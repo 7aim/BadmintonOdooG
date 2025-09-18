@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Cash Flow list View -->
+    <record id="view_volan_cash_flow_genclik_list" model="ir.ui.view">
+        <field name="name">volan.cash.flow.genclik.list</field>
+        <field name="model">volan.cash.flow.genclik</field>
+        <field name="arch" type="xml">
+            <list string="Kassa Əməliyyatları" decoration-success="transaction_type == 'income'" decoration-danger="transaction_type == 'expense'">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="category"/>
+                <field name="transaction_type"/>
+                <field name="partner_id"/>
+                <field name="amount" sum="Ümumi"/>
+                <field name="notes"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Cash Flow Form View -->
+    <record id="view_volan_cash_flow_genclik_form" model="ir.ui.view">
+        <field name="name">volan.cash.flow.genclik.form</field>
+        <field name="model">volan.cash.flow.genclik</field>
+        <field name="arch" type="xml">
+            <form string="Kassa Əməliyyatı">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="name"/>
+                            <field name="transaction_type"/>
+                            <field name="category" invisible="transaction_type != 'income'"/>
+                        </group>
+                        <group>
+                            <field name="amount"/>
+                            <field name="partner_id"/>
+                            <field name="notes" placeholder="Əlavə qeydlər..."/>
+                            <!--<field name="related_model" readonly="1" groups="base.group_system"/>
+                            <field name="related_id" readonly="1" groups="base.group_system"/>-->
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Cash Flow Search View -->
+    <record id="view_volan_cash_flow_genclik_search" model="ir.ui.view">
+        <field name="name">volan.cash.flow.genclik.search</field>
+        <field name="model">volan.cash.flow.genclik</field>
+        <field name="arch" type="xml">
+            <search string="Kassa Əməliyyatları Axtarışı">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="notes"/>
+                <separator/>
+                <filter string="Gəlirlər" name="income" domain="[('transaction_type', '=', 'income')]"/>
+                <filter string="Xərclər" name="expense" domain="[('transaction_type', '=', 'expense')]"/>
+                <separator/>
+                <filter string="Badminton Satışı" name="badminton_sale" domain="[('category', '=', 'badminton_sale')]"/>
+                <filter string="Badminton Dərs" name="badminton_lesson" domain="[('category', '=', 'badminton_lesson')]"/>
+                <filter string="Digər" name="other" domain="[('category', '=', 'other')]"/>
+                <separator/>
+                <filter string="Bu gün" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Bu həftə" name="this_week" domain="[('date', '&gt;=', (context_today() + relativedelta(weeks=-1, days=1, weekday=0)).strftime('%Y-%m-%d')), ('date', '&lt;=', (context_today() + relativedelta(weekday=6)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Bu ay" name="this_month" domain="[('date', '&gt;=', (context_today().replace(day=1)).strftime('%Y-%m-%d')), ('date', '&lt;=', (context_today() + relativedelta(months=1, day=1, days=-1)).strftime('%Y-%m-%d'))]"/>
+                <group expand="1" string="Qruplaşdır">
+                    <filter string="Əməliyyat Növü" name="group_by_type" context="{'group_by': 'transaction_type'}"/>
+                    <filter string="Kateqoriya" name="group_by_category" context="{'group_by': 'category'}"/>
+                    <filter string="Tarix" name="group_by_date" context="{'group_by': 'date'}"/>
+                    <filter string="Müştəri" name="group_by_partner" context="{'group_by': 'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Cash Flow Graph View -->
+    <record id="view_volan_cash_flow_genclik_graph" model="ir.ui.view">
+        <field name="name">volan.cash.flow.genclik.graph</field>
+        <field name="model">volan.cash.flow.genclik</field>
+        <field name="arch" type="xml">
+            <graph string="Kassa Əməliyyatları" type="bar" sample="1">
+                <field name="date"/>
+                <field name="amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Cash Flow Pivot View -->
+    <record id="view_volan_cash_flow_genclik_pivot" model="ir.ui.view">
+        <field name="name">volan.cash.flow.genclik.pivot</field>
+        <field name="model">volan.cash.flow.genclik</field>
+        <field name="arch" type="xml">
+            <pivot string="Kassa Əməliyyatları" display_quantity="true">
+                <field name="category" type="row"/>
+                <field name="date" interval="month" type="col"/>
+                <field name="amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Cash Balance Form View -->
+    <record id="view_volan_cash_balance_genclik_form" model="ir.ui.view">
+        <field name="name">volan.cash.balance.genclik.form</field>
+        <field name="model">volan.cash.balance.genclik</field>
+        <field name="arch" type="xml">
+            <form string="Kassa Balansı">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_refresh" type="object" string="Yenilə" 
+                                icon="fa-refresh" class="oe_stat_button"/>
+                        <button name="generate_cash_report" type="object" string="Hesabat" 
+                                icon="fa-bar-chart" class="oe_stat_button"/>
+                    </div>
+                    <div class="oe_title">
+                        <h1>Volan Genclik - Kassa Hesabatı</h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date_filter" widget="selection"/>
+                            <field name="date_from" invisible="date_filter != 'custom'" 
+                                required="date_filter == 'custom'" colspan="2"/>
+                            <field name="date_to" invisible="date_filter != 'custom'" 
+                                required="date_filter == 'custom'" colspan="2"/>                 
+                        </group>
+                    </group>
+                    <group string="Gəlir Məlumatları">
+                        <field name="badminton_sales_income" widget="monetary"/>
+                        <field name="badminton_lessons_income" widget="monetary"/>
+                        <field name="other_income" widget="monetary"/>
+                    </group>
+                    <group string="Ümumi Məlumatlar">
+                        <field name="total_income" widget="monetary" style="color: green;"/>
+                        <field name="total_expenses" widget="monetary" style="color: red;"/>
+                        <field name="current_balance" widget="monetary" class="oe_subtotal_footer_separator" style="font-weight: bold;"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for Cash Flow -->
+    <record id="action_volan_cash_flow_genclik" model="ir.actions.act_window">
+        <field name="name">Kassa Əməliyyatları</field>
+        <field name="res_model">volan.cash.flow.genclik</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                İlk kassa əməliyyatınızı yaradın!
+            </p>
+        </field>
+    </record>
+
+    <!-- Action for Cash Balance -->
+    <record id="action_volan_cash_balance_genclik" model="ir.actions.act_window">
+        <field name="name">Kassa Balansı</field>
+        <field name="res_model">volan.cash.balance.genclik</field>
+        <field name="view_mode">form</field>
+        <field name="target">main</field>
+    </record>
+
+    <!-- Main Menuitem -->
+    <menuitem id="menu_cash" name="💰 Kassa" parent="menu_sport_main" sequence="35"/>
+
+    <!-- Cash Submenu -->
+    <menuitem id="menu_cash_balance" name="Kassa Balansı" parent="menu_cash" 
+              action="action_volan_cash_balance_genclik" sequence="1"/>
+    <menuitem id="menu_cash_flow" name="Kassa Əməliyyatları" parent="menu_cash" 
+              action="action_volan_cash_flow_genclik" sequence="2"/>
+
+</odoo>

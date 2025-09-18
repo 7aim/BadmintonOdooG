@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_volan" model="ir.ui.view">
+        <field name="name">res.partner.form.volan</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vat']" position="after">
+                <group string="Şəxsi Məlumatlar">
+                    <field name="birth_date"/>
+                    <field name="age" readonly="1"/>
+                    <field name="branch"/>
+                    <field name="customer_source"/>
+                    <field name="additional_info"/>
+                    <field name="is_coach"/>
+                </group>
+                <group string="QR Kod">
+                    <field name="qr_code_image" widget="image" string=" "/>
+                </group>
+                <group string="Badminton Balansı">
+                    <field name="badminton_balance" style="font-size: 18px; font-weight: bold; color: #007bff;" 
+                           />
+                </group>
+            </xpath>
+            <xpath expr="//page[@name='internal_notes']" position="before">
+                <page string="Badminton Satışları" name="badminton_sales">
+                    <field name="badminton_sale_ids" context="{'default_partner_id': id}">
+                        <list string="Badminton Satışları" create="false" edit="false">
+                            <field name="name"/>
+                            <field name="sale_date"/>
+                            <field name="hours_quantity"/>
+                            <field name="total_amount"/>
+                            <field name="state"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Balans Tarixçəsi" name="balance_history">
+                    <field name="badminton_balance_history_ids" context="{'default_partner_id': id}">
+                        <list string="Balans Tarixçəsi" create="false" edit="false">
+                            <field name="transaction_date"/>
+                            <field name="transaction_type"/>
+                            <field name="hours_added"/>
+                            <field name="hours_used"/>
+                            <field name="balance_after"/>
+                            <field name="description"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Basketbol Üzvlüklər" name="basketball_memberships" invisible="[('is_company', '=', True)]">
+                    <field name="basketball_membership_ids" context="{'default_partner_id': id}">
+                        <list string="Basketbol Üzvlüklər" create="false" edit="false">
+                            <field name="name"/>
+                            <field name="month"/>
+                            <field name="year"/>
+                            <field name="total_lessons"/>
+                            <field name="attended_lessons"/>
+                            <field name="state"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

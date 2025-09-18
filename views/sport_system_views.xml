@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Sport Branch Views -->
+    <record id="view_sport_branch_genclik_form" model="ir.ui.view">
+        <field name="name">sport.branch.genclik.form</field>
+        <field name="model">sport.branch.genclik</field>
+        <field name="arch" type="xml">
+            <form string="İdman Növü">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="İdman növünün adı..."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="is_hourly"/>
+                            <field name="is_monthly"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description" placeholder="İdman növü haqqında məlumat..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sport_branch_genclik_list" model="ir.ui.view">
+        <field name="name">sport.branch.genclik.list</field>
+        <field name="model">sport.branch.genclik</field>
+        <field name="arch" type="xml">
+            <list string="İdman Növləri">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="is_hourly"/>
+                <field name="is_monthly"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Sport Schedule Views -->
+    <record id="view_sport_schedule_genclik_form" model="ir.ui.view">
+        <field name="name">sport.schedule.genclik.form</field>
+        <field name="model">sport.schedule.genclik</field>
+        <field name="arch" type="xml">
+            <form string="İdman Qrafiki">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="branch_id"/>
+                            <field name="day_of_week"/>
+                            <field name="is_active"/>
+                        </group>
+                        <group>
+                            <field name="start_time" widget="float_time"/>
+                            <field name="end_time" widget="float_time"/>
+                            <field name="instructor_id"/>
+                            <field name="max_students"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sport_schedule_genclik_list" model="ir.ui.view">
+        <field name="name">sport.schedule.genclik.list</field>
+        <field name="model">sport.schedule.genclik</field>
+        <field name="arch" type="xml">
+            <list string="İdman Qrafiki" decoration-success="is_active==True" decoration-danger="is_active==False">
+                <field name="name"/>
+                <field name="branch_id"/>
+                <field name="day_of_week"/>
+                <field name="start_time" widget="float_time"/>
+                <field name="end_time" widget="float_time"/>
+                <field name="instructor_id"/>
+                <field name="is_active"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Sport Membership Views -->
+    <record id="view_sport_membership_genclik_form" model="ir.ui.view">
+        <field name="name">sport.membership.genclik.form</field>
+        <field name="model">sport.membership.genclik</field>
+        <field name="arch" type="xml">
+            <form string="İdman Üzvlüyü">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,active,expired,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="branch_id"/>
+                            <field name="is_active"/>
+                        </group>
+                        <group>
+                            <field name="month"/>
+                            <field name="year"/>
+                            <field name="monthly_fee" readonly="1"/>
+                            <field name="total_lessons" readonly="1"/>
+                            <field name="attended_lessons" readonly="1"/>
+                            <field name="remaining_lessons" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Qrafiklər">
+                            <field name="schedule_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="day_of_week"/>
+                                    <field name="start_time" widget="float_time"/>
+                                    <field name="end_time" widget="float_time"/>
+                                    <field name="instructor_id"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sport_membership_genclik_list" model="ir.ui.view">
+        <field name="name">sport.membership.genclik.list</field>
+        <field name="model">sport.membership.genclik</field>
+        <field name="arch" type="xml">
+            <list string="İdman Üzvlükləri" decoration-success="state=='active'" 
+                  decoration-warning="state=='draft'" decoration-danger="state=='expired'">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="branch_id"/>
+                <field name="month"/>
+                <field name="year"/>
+                <field name="total_lessons"/>
+                <field name="attended_lessons"/>
+                <field name="remaining_lessons"/>
+                <field name="monthly_fee"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Sport Attendance Views -->
+    <record id="view_sport_attendance_genclik_form" model="ir.ui.view">
+        <field name="name">sport.attendance.genclik.form</field>
+        <field name="model">sport.attendance.genclik</field>
+        <field name="arch" type="xml">
+            <form string="Dərsə İştirak">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Dərsə İştirak</h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="membership_id"/>
+                            <field name="schedule_id"/>
+                            <field name="attendance_date"/>
+                            <field name="attendance_time"/>
+                        </group>
+                        <group>
+                            <field name="qr_scanned"/>
+                            <field name="is_valid" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="scan_result"/>
+                        <field name="notes"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sport_attendance_genclik_list" model="ir.ui.view">
+        <field name="name">sport.attendance.genclik.list</field>
+        <field name="model">sport.attendance.genclik</field>
+        <field name="arch" type="xml">
+            <list string="Dərsə İştiraklar" decoration-success="is_valid==True" decoration-danger="is_valid==False">
+                <field name="membership_id"/>
+                <field name="schedule_id"/>
+                <field name="attendance_date"/>
+                <field name="attendance_time"/>
+                <field name="qr_scanned"/>
+                <field name="is_valid"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_sport_branch_genclik" model="ir.actions.act_window">
+        <field name="name">İdman Növləri</field>
+        <field name="res_model">sport.branch.genclik</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_sport_schedule_genclik" model="ir.actions.act_window">
+        <field name="name">İdman Qrafiki</field>
+        <field name="res_model">sport.schedule.genclik</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_sport_membership_genclik" model="ir.actions.act_window">
+        <field name="name">İdman Üzvlükləri</field>
+        <field name="res_model">sport.membership.genclik</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_sport_attendance_genclik" model="ir.actions.act_window">
+        <field name="name">Dərsə İştiraklar</field>
+        <field name="res_model">sport.attendance.genclik</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_active_memberships" model="ir.actions.act_window">
+        <field name="name">Aktiv Üzvlüklər</field>
+        <field name="res_model">sport.membership.genclik</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', '=', 'active'), ('is_active', '=', True)]</field>
+        <field name="context">{'default_state': 'active'}</field>
+    </record>
+
+</odoo>

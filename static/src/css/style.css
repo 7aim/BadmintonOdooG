@@ -1,0 +1,19 @@
+.o_app[data-menu-xmlid="volan_genclikk.menu_sport_main"] .o_app_icon {
+    background-image: url('volan_genclikk/static/description/icon.png') !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+}
+
+/* Fix spacing for inline buttons */
+.ml-2 {
+    margin-left: 0.5rem !important;
+}
+
+.mt-2 {
+    margin-top: 0.5rem !important;
+}
+
+.mt-3 {
+    margin-top: 1rem !important;
+}

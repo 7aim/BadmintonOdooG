@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Session Extend Wizard Form -->
+    <record id="view_session_extend_wizard_form" model="ir.ui.view">
+        <field name="name">badminton.session.extend.wizard.genclik.form</field>
+        <field name="model">badminton.session.extend.wizard.genclik</field>
+        <field name="arch" type="xml">
+            <form string="Sessiyanı Uzat">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Badminton Sessiyası Uzatma</h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="current_balance" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="extend_hours"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        <strong>Diqqət:</strong> Sessiya uzadıldığı zaman müştərinin balansından 
+                        seçilən saat qədər azalacaq.
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="extend_session" string="Sessiyanı Uzat" 
+                            type="object" class="btn-primary"/>
+                    <button string="Ləğv et" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for the wizard -->
+    <record id="action_session_extend_wizard" model="ir.actions.act_window">
+        <field name="name">Sessiyanı Uzat</field>
+        <field name="res_model">badminton.session.extend.wizard.genclik</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_session_extend_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

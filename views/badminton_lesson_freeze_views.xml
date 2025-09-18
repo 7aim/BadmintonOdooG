@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Badminton Lesson Freeze Form View -->
+    <record id="view_badminton_lesson_freeze_genclik_form" model="ir.ui.view">
+        <field name="name">badminton.lesson.freeze.genclik.form</field>
+        <field name="model">badminton.lesson.freeze.genclik</field>
+        <field name="arch" type="xml">
+            <form string="Abunəlik Dondurma">
+                <header>
+                    <button name="action_complete" string="Tamamla" 
+                            type="object" class="btn-primary"
+                            invisible="state != 'active'"/>
+                    <button name="action_cancel" string="Ləğv et" 
+                            type="object" class="btn-danger"
+                            invisible="state != 'active'"/>
+                    <field name="state" widget="statusbar" 
+                           statusbar_visible="active,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="lesson_id" options="{'no_create': True}"/>
+                            <field name="partner_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="freeze_start_date"/>
+                            <field name="freeze_end_date"/>
+                            <field name="freeze_days" readonly="1"/>
+                            <field name="notes" nolabel="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Badminton Lesson Freeze List View -->
+    <record id="view_badminton_lesson_freeze_genclik_list" model="ir.ui.view">
+        <field name="name">badminton.lesson.freeze.genclik.list</field>
+        <field name="model">badminton.lesson.freeze.genclik</field>
+        <field name="arch" type="xml">
+            <list string="Abunəlik Dondurmalar">
+                <field name="name"/>
+                <field name="lesson_id"/>
+                <field name="partner_id"/>
+                <field name="freeze_start_date"/>
+                <field name="freeze_end_date"/>
+                <field name="freeze_days"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Badminton Lesson Freeze Search View -->
+    <record id="view_badminton_lesson_freeze_genclik_search" model="ir.ui.view">
+        <field name="name">badminton.lesson.freeze.genclik.search</field>
+        <field name="model">badminton.lesson.freeze.genclik</field>
+        <field name="arch" type="xml">
+            <search string="Abunəlik Dondurmalar">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="lesson_id"/>
+                <filter string="Aktiv" name="active" domain="[('state','=','active')]"/>
+                <filter string="Tamamlanmış" name="completed" domain="[('state','=','completed')]"/>
+                <filter string="Ləğv Edilib" name="cancelled" domain="[('state','=','cancelled')]"/>
+                <group expand="0" string="Qrupla">
+                    <filter name="group_by_lesson" string="Abunəlik" context="{'group_by': 'lesson_id'}"/>
+                    <filter name="group_by_partner" string="Müştəri" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_by_state" string="Vəziyyət" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Badminton Lesson Freeze Action Window -->
+    <record id="action_badminton_lesson_freeze_genclik" model="ir.actions.act_window">
+        <field name="name">Abunəlik Dondurmalar</field>
+        <field name="res_model">badminton.lesson.freeze.genclik</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Yeni abunəlik dondurma qeydi əlavə edin
+            </p>
+        </field>
+    </record>
+    
+    <!-- Badminton Lesson Freeze Wizard Form View -->
+    <record id="view_badminton_lesson_freeze_wizard_genclik_form" model="ir.ui.view">
+        <field name="name">badminton.lesson.freeze.wizard.genclik.form</field>
+        <field name="model">badminton.lesson.freeze.wizard.genclik</field>
+        <field name="arch" type="xml">
+            <form string="Abunəliyi Dondur">
+                <group>
+                    <group>
+                        <field name="lesson_id" readonly="1"/>
+                        <field name="partner_id" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="freeze_start_date"/>
+                        <field name="freeze_end_date"/>
+                        <field name="freeze_days" readonly="1"/>
+                    </group>
+                </group>
+                <group string="Qeydlər">
+                    <field name="notes" nolabel="1"/>
+                </group>
+                <footer>
+                    <button name="action_confirm_freeze" string="Dondur" 
+                            type="object" class="btn-primary"/>
+                    <button string="Ləğv et" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

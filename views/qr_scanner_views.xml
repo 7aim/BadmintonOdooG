@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- QR Scanner Wizard -->
+    <record id="view_qr_scanner_wizard_genclik" model="ir.ui.view">
+        <field name="name">qr.scanner.wizard.genclik.form</field>
+        <field name="model">qr.scanner.wizard.genclik</field>
+        <field name="arch" type="xml">
+            <form string="QR Kod Scanner">
+                <sheet>
+                    
+                    <group>
+                        <field name="qr_code_input" 
+                               placeholder="🔍 Bu sahəyə click edin və scanner cihazını QR koda tutun..." 
+                               widget="char" 
+                               style="font-size: 18px; font-family: monospace; background-color: #f8f9fa; border: 2px dashed #007bff; padding: 10px;"
+                               required="1"/>
+                    </group>
+                    
+                    <group invisible="not result_message">
+                        <field name="result_message" nolabel="1" readonly="1" 
+                               widget="text" style="font-size: 14px; font-weight: bold;"/>
+                    </group>
+                    
+                    <group invisible="not session_id">
+                        <field name="session_id" readonly="1"/>
+                    </group>
+                    
+                    <group invisible="not attendance_id">
+                        <field name="attendance_id" readonly="1"/>
+                    </group>
+                </sheet>
+                
+                <footer>
+                    <button name="scan_and_start_session" string="🚀 Xidməti Başlat" 
+                            type="object" class="btn-primary"
+                            invisible="session_id or attendance_id"/>
+                    
+                    <button name="open_session" string="📋 Badminton Sessiyanı Aç" 
+                            type="object" class="btn-success"
+                            invisible="not session_id"/>
+                    
+                    <button name="scan_new_qr" string="🔄 Yeni QR Scan" 
+                            type="object" class="btn-warning"
+                            invisible="not session_id and not attendance_id"/>
+                    
+                    <button string="❌ Bağla" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- QR Scanner Action -->
+    <record id="action_qr_scanner_wizard_genclik" model="ir.actions.act_window">
+        <field name="name">QR Kod Scanner</field>
+        <field name="res_model">qr.scanner.wizard.genclik</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_qr_scanner_wizard_genclik"/>
+        <field name="target">new</field>
+    </record>
+
+
+
+</odoo>

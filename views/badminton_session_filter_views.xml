@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Session Filter Form View -->
+    <record id="view_badminton_session_filter_genclik_form" model="ir.ui.view">
+        <field name="name">badminton.session.filter.genclik.form</field>
+        <field name="model">badminton.session.filter.genclik</field>
+        <field name="arch" type="xml">
+            <form string="Tarix Filtri">
+                <group>
+                    <field name="date_filter" widget="selection"/>
+                    <field name="date_from" invisible="date_filter != 'custom'" 
+                           required="date_filter == 'custom'"/>
+                    <field name="date_to" invisible="date_filter != 'custom'" 
+                           required="date_filter == 'custom'"/>
+                </group>
+                <footer>
+                    <button name="action_apply_filter" string="Filtri tətbiq et" 
+                            type="object" class="btn-primary"/>
+                    <button string="Ləğv et" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for Session Filter -->
+    <record id="action_badminton_session_filter_genclik" model="ir.actions.act_window">
+        <field name="name">Sessiya Filtri</field>
+        <field name="res_model">badminton.session.filter.genclik</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_badminton_session_filter_genclik_form"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Badminton Sessiya Sequence -->
+    <record id="seq_badminton_session" model="ir.sequence">
+        <field name="name">Badminton Sessiya Sequence</field>
+        <field name="code">badminton.session.genclik</field>
+        <field name="prefix">BS</field>
+        <field name="padding">3</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+
+    <!-- Sport Membership Sequence -->
+    <record id="seq_sport_membership" model="ir.sequence">
+        <field name="name">Sport Membership Sequence</field>
+        <field name="code">sport.membership.genclik</field>
+        <field name="prefix">SM</field>
+        <field name="padding">3</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+    
+    <!-- Badminton Lesson Freeze Sequence -->
+    <record id="seq_badminton_lesson_freeze" model="ir.sequence">
+        <field name="name">Badminton Lesson Freeze Sequence</field>
+        <field name="code">badminton.lesson.freeze.genclik</field>
+        <field name="prefix">FRZ</field>
+        <field name="padding">3</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+
+    <!-- Badminton Sale Sequence -->
+    <record id="seq_badminton_sale" model="ir.sequence">
+        <field name="name">Badminton Sale Sequence</field>
+        <field name="code">badminton.sale.genclik</field>
+        <field name="prefix">BSL</field>
+        <field name="padding">3</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+
+    <!-- Badminton Lesson Sequence -->
+    <record id="seq_badminton_lesson" model="ir.sequence">
+        <field name="name">Badminton Lesson Sequence</field>
+        <field name="code">badminton.lesson</field>
+        <field name="prefix">BL</field>
+        <field name="padding">3</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+
+    <record id="seq_badminton_attendance_check" model="ir.sequence">
+        <field name="name">Badminton İştirak Yoxlama</field>
+        <field name="code">badminton.attendance.check.genclik</field>
+        <field name="prefix">BAC</field>
+        <field name="padding">3</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+
+    <!-- Default İdman Növləri -->
+    <record id="sport_badminton" model="sport.branch.genclik">
+        <field name="name">Badminton</field>
+        <field name="code">badminton</field>
+        <field name="is_hourly">True</field>
+        <field name="description">Saatlıq badminton oyunu</field>
+    </record>
+
+    <!-- Badminton Lesson Simple Sequence -->
+    <record id="seq_badminton_lesson_simple_genclik" model="ir.sequence">
+        <field name="name">Badminton Lesson Simple Sequence</field>
+        <field name="code">badminton.lesson.simple.genclik</field>
+        <field name="prefix">BLS</field>
+        <field name="padding">3</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+    
+</odoo>

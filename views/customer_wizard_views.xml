@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Customer Lookup Wizard Form -->
+    <record id="view_customer_lookup_wizard_form" model="ir.ui.view">
+        <field name="name">customer.lookup.wizard.form</field>
+        <field name="model">customer.lookup.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Müştəri Axtarışı">
+                <group>
+                    <field name="search_term" placeholder="Müştəri adı və ya telefon nömrəsi daxil edin..."/>
+                </group>
+                <group string="Tapılan Müştərilər">
+                    <field name="customer_ids" nolabel="1">
+                        <list string="Müştərilər">
+                            <field name="name"/>
+                            <field name="phone"/>
+                            <field name="mobile"/>
+                            <field name="badminton_balance" string="Badminton Balansı"/>
+                        </list>
+                    </field>
+                </group>
+                <footer>
+                    <button name="action_view_customer" type="object" string="Müştəri Səhifəsini Aç" class="btn-primary"/>
+                    <button string="Bağla" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Customer Lookup Wizard Action -->
+    <record id="action_customer_lookup_wizard" model="ir.actions.act_window">
+        <field name="name">Müştəri Axtarışı</field>
+        <field name="res_model">customer.lookup.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Badminton Sale Wizard Form -->
+    <record id="view_badminton_sale_wizard_genclik_form" model="ir.ui.view">
+        <field name="name">badminton.sale.wizard.genclik.form</field>
+        <field name="model">badminton.sale.wizard.genclik</field>
+        <field name="arch" type="xml">
+            <form string="Badminton Satışı">
+                <group>
+                    <group string="Müştəri Məlumatları">
+                        <field name="partner_id" options="{'no_create': True}" required="1"/>
+                        <field name="customer_type"/>
+                        <field name="current_balance" readonly="1" style="font-weight: bold; color: #007bff;"/>
+                    </group>
+                    <group string="Satış Məlumatları">
+                        <field name="package_type"/>
+                        <field name="hours_quantity" readonly="package_type != 'single'"/>
+                        <!--field name="unit_price" readonly="1"/>-->
+                        <field name="total_amount" readonly="1" style="font-weight: bold; color: #28a745;"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_create_sale" type="object" string="Satışı Tamamla" class="btn-primary"/>
+                    <button string="Ləğv Et" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Badminton Sale Wizard Action -->
+    <record id="action_badminton_sale_wizard_genclik" model="ir.actions.act_window">
+        <field name="name">Badminton Satışı</field>
+        <field name="res_model">badminton.sale.wizard.genclik</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

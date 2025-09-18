@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Form View -->
+    <record id="view_badminton_attendance_check_genclik_form" model="ir.ui.view">
+        <field name="name">badminton.attendance.check.genclik.form</field>
+        <field name="model">badminton.attendance.check.genclik</field>
+        <field name="arch" type="xml">
+            <form string="İştirak Yoxlama">
+                <header>
+                    <button name="action_confirm" type="object" string="Təsdiqlə"
+                            class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_cancel" type="object" string="Ləğv Et"
+                            invisible="state not in ('draft', 'confirmed')"/>
+                    <button name="action_draft" type="object" string="Layihəyə Qaytar"
+                            invisible="state != 'cancelled'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="coach_id"/>
+                            <field name="group_id"/>
+                            <field name="check_date"/>
+                        </group>
+                        <group>
+                            <field name="schedule_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="day_of_week"/>
+                            <field name="attendee_count"/>
+                            <field name="present_count"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="İştirakçılar">
+                            <field name="attendee_ids"/>
+                        </page>
+                    </notebook>
+                    <group>
+                        <field name="notes" placeholder="Qeydlər..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- list View -->
+    <record id="view_badminton_attendance_check_genclik_list" model="ir.ui.view">
+        <field name="name">badminton.attendance.check.genclik.list</field>
+        <field name="model">badminton.attendance.check.genclik</field>
+        <field name="arch" type="xml">
+            <list string="İştirak Yoxlamaları" decoration-success="state=='confirmed'" decoration-danger="state=='cancelled'" decoration-muted="state=='draft'">
+                <field name="name"/>
+                <field name="coach_id"/>
+                <field name="group_id"/>
+                <field name="check_date"/>
+                <field name="schedule_id"/>
+                <field name="attendee_count"/>
+                <field name="present_count"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_badminton_attendance_check_genclik_search" model="ir.ui.view">
+        <field name="name">badminton.attendance.check.genclik.search</field>
+        <field name="model">badminton.attendance.check.genclik</field>
+        <field name="arch" type="xml">
+            <search string="İştirak Yoxlamaları">
+                <field name="name"/>
+                <field name="coach_id"/>
+                <field name="group_id"/>
+                <field name="check_date"/>
+                <separator/>
+                <filter string="Bu Gün" name="today" domain="[('check_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Bu Həftə" name="this_week" domain="[('check_date', '>=', (context_today() + relativedelta(weeks=-1, days=1, weekday=0)).strftime('%Y-%m-%d')), ('check_date', '&lt;=', (context_today() + relativedelta(weekday=6)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="Layihə" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Təsdiqlənib" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Ləğv Edilib" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Məşqçi" name="group_coach" context="{'group_by': 'coach_id'}"/>
+                    <filter string="Qrup" name="group_group" context="{'group_by': 'group_id'}"/>
+                    <filter string="Tarix" name="group_date" context="{'group_by': 'check_date'}"/>
+                    <filter string="Həftənin Günü" name="group_day" context="{'group_by': 'day_of_week'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_badminton_attendance_check_line_genclik_list" model="ir.ui.view">
+        <field name="name">badminton.attendance.check.line.genclik.list</field>
+        <field name="model">badminton.attendance.check.line.genclik</field>
+        <field name="arch" type="xml">
+            <list string="İştirakçılar" editable="bottom">
+                <field name="partner_id" options="{'no_create': True}"/>
+                <field name="lesson_id" invisible="1"/>
+                <field name="is_present"/>
+                <field name="notes"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Kanban View for Attendees -->
+    <record id="view_badminton_attendance_check_line_genclik_kanban" model="ir.ui.view">
+        <field name="name">badminton.attendance.check.line.genclik.kanban</field>
+        <field name="model">badminton.attendance.check.line.genclik</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="id"/>
+                <field name="partner_id"/>
+                <field name="is_present"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click {{record.is_present.raw_value ? 'oe_kanban_color_3' : 'oe_kanban_color_1'}}">
+                            <div class="oe_kanban_details">
+                                <div class="o_kanban_image">
+                                    <img t-att-src="kanban_image('res.partner', 'image_128', record.partner_id.raw_value)" alt="Partner"/>
+                                </div>
+                                <div class="oe_kanban_content">
+                                    <div>
+                                        <strong class="o_kanban_record_title">
+                                            <field name="partner_id"/>
+                                        </strong>
+                                    </div>
+                                    <div class="o_kanban_tags_section">
+                                        <span t-attf-class="badge {{record.is_present.raw_value ? 'badge-success' : 'badge-danger'}}">
+                                            <field name="is_present" widget="boolean_toggle"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Action and Menu Item -->
+    <record id="action_badminton_attendance_check" model="ir.actions.act_window">
+        <field name="name">Dərsə İştirak Yoxlaması</field>
+        <field name="res_model">badminton.attendance.check.genclik</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Yeni iştirak yoxlaması yaradın
+            </p>
+        </field>
+    </record>
+
+    <!-- Attendee List Action -->
+    <record id="action_badminton_attendance_check_attendees" model="ir.actions.act_window">
+        <field name="name">İştirakçılar</field>
+        <field name="res_model">badminton.attendance.check.line.genclik</field>
+        <field name="view_mode">kanban,list</field>
+        <field name="domain">[('attendance_check_id', '=', context.get('search_default_attendance_check_id', False))]</field>
+        <field name="context">{'default_attendance_check_id': context.get('search_default_attendance_check_id', False)}</field>
+    </record>
+
+    <!-- Add smart button to form view -->
+    <record id="view_badminton_attendance_check_genclik_form_button" model="ir.ui.view">
+        <field name="name">badminton.attendance.check.genclik.form.button</field>
+        <field name="model">badminton.attendance.check.genclik</field>
+        <field name="inherit_id" ref="view_badminton_attendance_check_genclik_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@class='oe_title']" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button name="%(action_badminton_attendance_check_attendees)d" type="action"
+                            class="oe_stat_button" icon="fa-users"
+                            context="{'search_default_attendance_check_id': id}">
+                        <div class="o_stat_info">
+                            <field name="present_count" class="o_stat_value"/>
+                            <span class="o_stat_text">İştirak / </span>
+                            <field name="attendee_count" class="o_stat_value"/>
+                        </div>
+                    </button>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

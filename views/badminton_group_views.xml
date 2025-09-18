@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Badminton Group Form View -->
+    <record id="view_badminton_group_genclik_form" model="ir.ui.view">
+        <field name="name">badminton.group.genclik.form</field>
+        <field name="model">badminton.group.genclik</field>
+        <field name="arch" type="xml">
+            <form string="Badminton Qrupu">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Qrup adı..."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="is_active"/>
+                        </group>
+                        <group>
+                            <field name="member_count" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Təsvir">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Qrup Qrafiki">
+                            <field name="schedule_ids">
+                                <list string="Həftəlik Qrafik" editable="bottom">
+                                    <field name="day_of_week"/>
+                                    <field name="start_time" widget="float_time"/>
+                                    <field name="end_time" widget="float_time"/>
+                                    <field name="is_active"/>
+                                    <field name="notes"/>
+                                </list>
+                            </field>
+                            <div class="mt-3">
+                                <p><strong>Nümunə:</strong></p>
+                                <ul>
+                                    <li>Çərşənbə → 12:00–13:00</li>
+                                    <li>Bazar → 11:00–12:00</li>
+                                </ul>
+                            </div>
+                        </page>
+                        <page string="Qrup Üzvləri">
+                            <field name="member_ids" domain="[('state', 'in', ['active', 'frozen'])]">
+                                <list string="Qrup Üzvləri" create="false">
+                                    <field name="partner_id"/>
+                                    <field name="state" decoration-info="state == 'frozen'" decoration-success="state == 'active'"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="total_months"/>
+                                    <field name="total_attendances"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Qeydlər">
+                            <field name="notes" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Badminton Group List View -->
+    <record id="view_badminton_group_genclik_list" model="ir.ui.view">
+        <field name="name">badminton.group.genclik.list</field>
+        <field name="model">badminton.group.genclik</field>
+        <field name="arch" type="xml">
+            <list string="Badminton Qrupları" decoration-success="is_active==True" 
+                  decoration-muted="is_active==False">
+                <field name="name"/>
+                <field name="member_count"/>
+                <field name="is_active"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Badminton Group Search View -->
+    <record id="view_badminton_group_genclik_search" model="ir.ui.view">
+        <field name="name">badminton.group.genclik.search</field>
+        <field name="model">badminton.group.genclik</field>
+        <field name="arch" type="xml">
+            <search string="Badminton Qrupları">
+                <field name="name"/>
+                <filter string="Aktiv Qruplar" name="active" domain="[('is_active', '=', True)]"/>
+                <filter string="Passiv Qruplar" name="inactive" domain="[('is_active', '=', False)]"/>
+                <group expand="0" string="Qruplaşdırma">
+                    <filter string="Aktivlik" name="group_active" context="{'group_by': 'is_active'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_badminton_group_genclik" model="ir.actions.act_window">
+        <field name="name">Badminton Qrupları</field>
+        <field name="res_model">badminton.group.genclik</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'default_is_active': True}</field>
+    </record>
+
+</odoo>

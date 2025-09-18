@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Badminton Sessiya Form Görünüşü -->
+    <record id="view_badminton_session_genclik_form" model="ir.ui.view">
+        <field name="name">badminton.session.genclik.form</field>
+        <field name="model">badminton.session.genclik</field>
+        <field name="arch" type="xml">
+            <form string="Badminton Sessiyası">
+                <header>
+                    <button name="complete_session" string="Sessiyanı Tamamla" 
+                            type="object" class="btn-primary"
+                            invisible="state not in ['active', 'extended']"/>
+                    <button name="action_extend_session_wizard" string="Sessiyanı Uzat" 
+                            type="object" class="btn-warning"
+                            invisible="state not in ['active', 'extended']"/>
+                    <field name="state" widget="statusbar" 
+                           statusbar_visible="draft,active,extended,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="start_time"/>
+                            <field name="end_time"/>
+                            <field name="completion_time" readonly="1" invisible="[('state', '!=', 'completed')]"/>
+                            <field name="qr_scanned" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="duration_hours"/>
+                            <field name="extended_time" readonly="1"/>
+                            <field name="recently_completed" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Qeydlər">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Badminton Sessiya list Görünüşü -->
+    <record id="view_badminton_session_genclik_list" model="ir.ui.view">
+        <field name="name">badminton.session.genclik.list</field>
+        <field name="model">badminton.session.genclik</field>
+        <field name="arch" type="xml">
+            <list string="Badminton Sessiyaları" 
+                  decoration-success="state=='completed' and not recently_completed" 
+                  decoration-warning="state=='active'" 
+                  decoration-info="state=='extended'"
+                  decoration-primary="recently_completed">
+                <header>
+                    <button name="%(action_badminton_session_filter_genclik)d" string="📅 Tarixə görə filtrlə" type="action" class="btn btn-primary"/>
+                </header>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="start_time"/>
+                <field name="end_time"/>
+                <field name="completion_time"/>
+                <field name="duration_hours"/>
+                <field name="state"/>
+                <field name="recently_completed" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Aktiv Sessiyalar üçün xüsusi görünüş -->
+    <record id="view_active_sessions_list" model="ir.ui.view">
+        <field name="name">active.badminton.session.genclik.list</field>
+        <field name="model">badminton.session.genclik</field>
+        <field name="arch" type="xml">
+            <list string="Aktiv Sessiyalar" 
+                  decoration-warning="state=='active' and not time_expired" 
+                  decoration-info="state=='extended' and not time_expired"
+                  decoration-danger="time_expired"
+                  create="false">
+                <field name="partner_id"/>
+                <field name="start_time"/>
+                <field name="end_time"/>
+                <field name="state"/>
+                <field name="time_expired" invisible="1"/>
+                <button name="extend_session" string="Uzat" type="object" icon="fa-clock-o"/>
+                <button name="complete_session" string="Tamamla" type="object" icon="fa-check"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- QR Kod Oxuma Görünüşü -->
+    <record id="view_qr_scanner_form" model="ir.ui.view">
+        <field name="name">qr.scanner.form</field>
+        <field name="model">badminton.session.genclik</field>
+        <field name="arch" type="xml">
+            <form string="QR Kod Oxuyucu">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>QR Kod Oxuyucu</h1>
+                    </div>
+                    <group>
+                        <field name="partner_id" string="Müştəri Seçin (Manual)"/>
+                        <field name="duration_hours"/>
+                    </group>
+                    <footer>
+                        <button name="start_session_manual" string="Sessiyanı Başlat" 
+                                type="object" class="btn-primary"/>
+                        <button string="Ləğv et" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Menular -->
+    <record id="action_badminton_session_genclik" model="ir.actions.act_window">
+        <field name="name">Bütün Sessiyalar</field>
+        <field name="res_model">badminton.session.genclik</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+    </record>
+
+    <record id="action_active_sessions" model="ir.actions.act_window">
+        <field name="name">Aktiv Sessiyalar</field>
+        <field name="res_model">badminton.session.genclik</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_active_sessions_list"/>
+        <field name="domain">[('state', 'in', ['active', 'extended'])]</field>
+        <field name="context">{'create': False}</field>
+    </record>
+
+    <record id="action_qr_scanner" model="ir.actions.act_window">
+        <field name="name">QR Kod Oxuyucu</field>
+        <field name="res_model">badminton.session.genclik</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_qr_scanner_form"/>
+        <field name="target">new</field>
+        <field name="context">{'default_state': 'draft'}</field>
+    </record>
+
+</odoo>
