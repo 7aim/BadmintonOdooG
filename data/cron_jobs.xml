@@ -11,5 +11,17 @@
             <field name="interval_type">minutes</field>
             <field name="active" eval="True"/>
         </record>
+
+        <!-- 10-min window notifier (ONE time per session end_time thanks to warn10_sent) -->
+        <record id="ir_cron_badminton_session_warning" model="ir.cron">
+            <field name="name">Badminton: 10 dəq qalmış xəbərdarlıq</field>
+            <field name="model_id" ref="model_badminton_session_genclik"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_send_session_warnings()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="active" eval="True"/>
+            <field name="user_id" ref="base.user_admin"/>
+        </record>
     </data>
 </odoo>

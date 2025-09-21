@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_sport_main" name="Volan Genclik" sequence="100" web_icon="volan_genclik/static/description/icon.png"/>
+    <menuitem id="menu_sport_main" name="Volan Genclik" sequence="100" 
+              web_icon="volan_genclikk/static/description/icon.png"
+              groups="volan_genclikk.group_volan_satici,volan_genclikk.group_volan_mesqci,volan_genclikk.group_volan_nezaretci,base.group_system"/>
 
-    <!-- Badminton Bölməsi -->
     <menuitem id="menu_badminton_section" name="🏸 Badminton" parent="menu_sport_main" sequence="10"/>
 
-    <menuitem id="menu_badminton_sessions" name="Sessiyalar" parent="menu_badminton_section" sequence="15"/>
+    <menuitem id="menu_badminton_sessions" name="Sessiyalar" parent="menu_badminton_section" sequence="15" 
+              groups="volan_genclikk.group_volan_nezaretci"/>
     <menuitem id="menu_active_sessions" name="Aktiv Sessiyalar" parent="menu_badminton_sessions" 
               action="action_active_sessions" sequence="1"/>
     <menuitem id="menu_all_sessions" name="Bütün Sessiyalar" parent="menu_badminton_sessions" 
@@ -13,42 +15,56 @@
     <menuitem id="menu_session_filter" name="Tarixə görə sessiyalar" parent="menu_badminton_sessions" 
               action="action_badminton_session_filter_genclik" sequence="3"/>
 
-    <menuitem id="menu_badminton_sales" name="Satış" parent="menu_badminton_section" sequence="20"/>
+    <menuitem id="menu_badminton_sales" name="Satış" parent="menu_badminton_section" sequence="20" 
+              groups="volan_genclikk.group_volan_satici"/>
     <menuitem id="menu_badminton_sale_wizard" name="Badminton Satışı" parent="menu_badminton_sales" 
-              action="action_badminton_sale_wizard_genclik" sequence="3"/>
+              action="action_badminton_sale_wizard_genclik" sequence="4"/>
     <menuitem id="menu_badminton_sales_history" name="Satış Tarixçəsi" parent="menu_badminton_sales" 
-              action="action_badminton_sale_genclik" sequence="4"/>
+              action="action_badminton_sale_genclik" sequence="3"/>
     <menuitem id="menu_badminton_balance_history" name="Balans Tarixçəsi" parent="menu_badminton_sales" 
               action="action_badminton_balance_history" sequence="5"/>
 
-    <menuitem id="menu_badminton_lessons" name="Badmınton Dərsləri" parent="menu_badminton_section" sequence="25"/>
+    <menuitem id="menu_badminton_lessons" name="Badminton Dərsləri" parent="menu_badminton_section" sequence="25"
+              groups="volan_genclikk.group_volan_satici,volan_genclikk.group_volan_mesqci"/>
     <menuitem id="menu_badminton_lessons_simple" name="Abunəliklər" parent="menu_badminton_lessons" 
-              action="action_badminton_lesson_simple_genclik" sequence="6"/>
+              action="action_badminton_lesson_simple_genclik" sequence="1" groups="volan_genclikk.group_volan_satici"/>
     <menuitem id="menu_badminton_groups" name="Badminton Qrupları" parent="menu_badminton_lessons" 
-              action="action_badminton_group_genclik" sequence="7"/>
+              action="action_badminton_group_genclik" sequence="2" groups="volan_genclikk.group_volan_satici,volan_genclikk.group_volan_mesqci"/>
     <menuitem id="menu_badminton_lesson_freeze" name="Dondurma Tarixçəsi" parent="menu_badminton_lessons" 
-              action="action_badminton_lesson_freeze_genclik" sequence="8"/>
-    
-    <!-- Yoxlama Bölməsi -->
-    <menuitem id="menu_badminton_attendance_check" name="Yoxlama" parent="menu_badminton_section" sequence="27"/>
-    <menuitem id="menu_badminton_attendance_check_list" name="İştirak Yoxlaması" parent="menu_badminton_attendance_check" 
-              action="action_badminton_attendance_check" sequence="1"/>
+              action="action_badminton_lesson_freeze_genclik" sequence="3" groups="volan_genclikk.group_volan_satici"/>
+    <menuitem id="menu_badminton_attendance_check_list" name="İştirak Yoxlaması" parent="menu_badminton_lessons" 
+              action="action_badminton_attendance_check_genclik" sequence="4" groups="volan_genclikk.group_volan_mesqci"/>
 
-    <!-- Diger Bölmələr -->
+
     <menuitem id="menu_qr_section" name="🔍 QR Scan" parent="menu_sport_main" 
-              action="action_qr_scanner_wizard_genclik" sequence="30"/>
+              action="action_qr_scanner_wizard_genclik" sequence="30" groups="volan_genclikk.group_volan_nezaretci"/>
+
+    <!-- Müştərilər menyusunda domain əlavə et -->
+    <record id="action_customers_genclik" model="ir.actions.act_window">
+        <field name="name">genclik Müştəriləri</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('is_company', '=', False), ('branch', '=', 'genclik')]</field>
+        <field name="context">{'default_is_company': False, 'default_branch': 'genclik'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Yeni müştəri əlavə edin!
+            </p>
+            <p>
+                Bu bölmədə genclik filialının müştərilərini idarə edə bilərsiniz.
+            </p>
+        </field>
+    </record>
 
     <menuitem id="menu_customers" name="🤵‍♂️ Müştərilər" parent="menu_sport_main" 
-              action="contacts.action_contacts" sequence="31"/>
+            action="action_customers_genclik" sequence="31" groups="volan_genclikk.group_volan_satici,volan_genclikk.group_volan_nezaretci,volan_genclikk.group_volan_admin"/>
 
     <menuitem id="menu_employees" name="🧑‍🔧 İşçilər" parent="menu_sport_main" 
-              action="hr.open_view_employee_list_my" sequence="32"/>
-
-    <!-- Tənzimləmələr Bölməsi -->
-    <menuitem id="menu_sport_config" name="⚙️ Tənzimləmələr" parent="menu_sport_main" sequence="40"/>
+              action="hr.open_view_employee_list_my" sequence="32" groups="volan_genclikk.group_volan_admin"/>
+    <menuitem id="menu_sport_config" name="⚙️ Tənzimləmələr" parent="menu_sport_main" sequence="40"
+              groups="volan_genclikk.group_volan_admin"/>
     <menuitem id="menu_customer_lookup" name="Müştəri Axtarışı" parent="menu_sport_config" 
               action="action_customer_lookup_wizard" sequence="1"/>
     <menuitem id="menu_sport_branches" name="İdman Növləri" parent="menu_sport_config" 
               action="action_sport_branch_genclik" sequence="2"/>
-
 </odoo>
