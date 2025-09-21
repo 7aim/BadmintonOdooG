@@ -143,7 +143,7 @@
     </record>
 
     <!-- Action and Menu Item -->
-    <record id="action_badminton_attendance_check" model="ir.actions.act_window">
+    <record id="action_badminton_attendance_check_genclik" model="ir.actions.act_window">
         <field name="name">Dərsə İştirak Yoxlaması</field>
         <field name="res_model">badminton.attendance.check.genclik</field>
         <field name="view_mode">list,form</field>
