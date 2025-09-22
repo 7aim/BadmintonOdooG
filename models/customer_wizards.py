@@ -145,6 +145,7 @@ class BadmintonSaleWizard(models.TransientModel):
                 'message': f'{self.partner_id.name} üçün {self.hours_quantity} saat badminton satışı tamamlandı! '
                           f'Yeni balans: {self.partner_id.badminton_balance} saat',
                 'type': 'success',
-                'sticky': True,
+                'sticky': False,
+                'next': {'type': 'ir.actions.act_window_close'}
             }
         }
