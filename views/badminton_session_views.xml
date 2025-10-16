@@ -60,8 +60,9 @@
         <field name="arch" type="xml">
             <list string="Badminton Sessiyaları"
                   decoration-success="state=='completed' and not recently_completed"
-                  decoration-warning="state=='active'"
-                  decoration-info="state=='extended'"
+                  decoration-warning="state=='active' and not warn10_sent"
+                  decoration-danger="warn10_sent"
+                  decoration-info="state=='extended' and not warn10_sent"
                   decoration-primary="recently_completed">
 
                 <field name="name"/>
@@ -72,6 +73,7 @@
                 <field name="duration_hours"/>
                 <field name="state"/>
                 <field name="recently_completed" invisible="1"/>
+                <field name="warn10_sent" invisible="1"/>
             </list>
         </field>
     </record>
@@ -82,15 +84,16 @@
         <field name="model">badminton.session.genclik</field>
         <field name="arch" type="xml">
             <list string="Aktiv Sessiyalar"
-                  decoration-warning="state=='active' and not time_expired"
-                  decoration-info="state=='extended' and not time_expired"
-                  decoration-danger="time_expired"
+                  decoration-warning="state=='active' and not time_expired and not warn10_sent"
+                  decoration-info="state=='extended' and not time_expired and not warn10_sent"
+                  decoration-danger="warn10_sent or time_expired"
                   create="false">
                 <field name="partner_id"/>
                 <field name="start_time"/>
                 <field name="end_time"/>
                 <field name="state"/>
                 <field name="time_expired" invisible="1"/>
+                <field name="warn10_sent" invisible="1"/>
                 <button name="extend_session" string="Uzat" type="object" icon="fa-clock-o"/>
                 <button name="complete_session" string="Tamamla" type="object" icon="fa-check"/>
             </list>
@@ -108,7 +111,8 @@
                         <h1>QR Kod Oxuyucu</h1>
                     </div>
                     <group>
-                        <field name="partner_id" string="Müştəri Seçin (Manual)"/>
+                        <field name="partner_id" string="Müştəri Seçin (Manual)"
+                               domain="[('is_company', '=', False), ('branch', '=', 'genclik')]"/>
                         <field name="duration_hours"/>
                     </group>
                     <footer>

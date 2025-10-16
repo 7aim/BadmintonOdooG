@@ -43,16 +43,28 @@
             <form string="Badminton Satışı">
                 <group>
                     <group string="Müştəri Məlumatları">
-                        <field name="partner_id" options="{'no_create': True}" required="1"/>
-                        <field name="customer_type"/>
+                        <field name="partner_id" options="{'no_create': True}" required="1"
+                               domain="[('is_company', '=', False), ('branch', '=', 'genclik')]"/>
                         <field name="current_balance" readonly="1" style="font-weight: bold; color: #007bff;"/>
                     </group>
-                    <group string="Satış Məlumatları">
-                        <field name="package_type"/>
-                        <field name="hours_quantity" readonly="package_type != 'single'"/>
-                        <!--field name="unit_price" readonly="1"/>-->
-                        <field name="total_amount" readonly="1" style="font-weight: bold; color: #28a745;"/>
+                    <group string="Paket Satışı">
+                        <field name="package_id" domain="[('active', '=', True)]"/>
+                        <field name="customer_type" invisible="not package_id"/>
+                        <field name="is_student" invisible="not package_id"/>
                     </group>
+                </group>
+                <group string="Sadə Satış (Paket seçilmədikdə)" invisible="package_id">
+                    <group>
+                        <field name="customer_type"/>
+                        <field name="hours_quantity"/>
+                    </group>
+                    <group>
+                        <field name="unit_price"/>
+                        <field name="total_amount" style="font-weight: bold; color: #28a745;"/>
+                    </group>
+                </group>
+                <group string="Ümumi Məbləğ" invisible="not package_id">
+                    <field name="total_amount" style="font-weight: bold; font-size: 18px; color: #28a745;"/>
                 </group>
                 <footer>
                     <button name="action_create_sale" type="object" string="Satışı Tamamla" class="btn-primary"/>

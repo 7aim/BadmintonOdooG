@@ -38,8 +38,18 @@ class VolanPartner(models.Model):
                                       help="Müştərinin qalan badminton saatlarının sayı")
     
     # 5. Badminton Satış Tarixçəsi
-    badminton_sale_ids = fields.One2many('badminton.sale.genclik', 'partner_id', string="Badminton Satışları")
-    badminton_balance_history_ids = fields.One2many('badminton.balance.history.genclik', 'partner_id', string="Balans Tarixçəsi")
+    badminton_sale_ids = fields.One2many(
+        'badminton.sale.genclik',
+        'partner_id',
+        string="Badminton Satışları",
+        groups="volan_genclikk.group_genclik_admin,volan_genclikk.group_genclik_satici"
+    )
+    badminton_balance_history_ids = fields.One2many(
+        'badminton.balance.history.genclik',
+        'partner_id',
+        string="Balans Tarixçəsi",
+        groups="volan_genclikk.group_genclik_admin,volan_genclikk.group_genclik_satici"
+    )
 
     # 7. Məşqçi bayrağı
     is_coach = fields.Boolean(string="Məşqçidir", default=False, help="İşçinin məşqçi olub olmadığını göstərir")

@@ -27,7 +27,8 @@
                     </div>
                     <group>
                         <group>
-                            <field name="partner_id" options="{'no_create': True}"/>
+                            <field name="partner_id" options="{'no_create': True}" 
+                                   domain="[('is_company', '=', False), ('branch', '=', 'genclik')]"/>
                             <field name="customer_type"/>
                             <field name="package_type"/>
                             <field name="sale_date"/>

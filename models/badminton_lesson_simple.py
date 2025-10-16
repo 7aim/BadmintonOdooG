@@ -24,7 +24,7 @@ class BadmintonLessonSimple(models.Model):
 
     # Tarix məlumatları
     start_date = fields.Date(string="Cari Dövr Başlama", required=True, default=fields.Date.today)
-    end_date = fields.Date(string="Cari Dövr Bitmə", compute='_compute_end_date', store=True)
+    end_date = fields.Date(string="Cari Dövr Bitmə", compute='_compute_end_date', store=True, readonly=False)
     
     # Abunəlik məlumatları
     total_months = fields.Integer(string="Ümumi Abunəlik (ay)", default=1)

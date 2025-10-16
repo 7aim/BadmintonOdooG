@@ -17,13 +17,13 @@
                 <group string="QR Kod">
                     <field name="qr_code_image" widget="image" string=" "/>
                 </group>
-                <group string="Badminton Balansı">
+                <group string="Badminton Balansı" groups="volan_genclikk.group_genclik_satici,volan_genclikk.group_genclik_admin,volan_genclikk.group_genclik_nezaretci,volan_genclikk.group_genclik_mesqci">
                     <field name="badminton_balance" style="font-size: 18px; font-weight: bold; color: #007bff;" 
                            />
                 </group>
             </xpath>
             <xpath expr="//page[@name='internal_notes']" position="before">
-                <page string="Badminton Satışları" name="badminton_sales">
+                <page string="Badminton Satışları" name="badminton_sales" groups="volan_genclikk.group_genclik_satici,volan_genclikk.group_genclik_admin">
                     <field name="badminton_sale_ids" context="{'default_partner_id': id}">
                         <list string="Badminton Satışları" create="false" edit="false">
                             <field name="name"/>
@@ -34,7 +34,7 @@
                         </list>
                     </field>
                 </page>
-                <page string="Balans Tarixçəsi" name="balance_history">
+                <page string="Balans Tarixçəsi" name="balance_history" groups="volan_genclikk.group_genclik_satici,volan_genclikk.group_genclik_admin">
                     <field name="badminton_balance_history_ids" context="{'default_partner_id': id}">
                         <list string="Balans Tarixçəsi" create="false" edit="false">
                             <field name="transaction_date"/>
@@ -43,18 +43,6 @@
                             <field name="hours_used"/>
                             <field name="balance_after"/>
                             <field name="description"/>
-                        </list>
-                    </field>
-                </page>
-                <page string="Basketbol Üzvlüklər" name="basketball_memberships" invisible="[('is_company', '=', True)]">
-                    <field name="basketball_membership_ids" context="{'default_partner_id': id}">
-                        <list string="Basketbol Üzvlüklər" create="false" edit="false">
-                            <field name="name"/>
-                            <field name="month"/>
-                            <field name="year"/>
-                            <field name="total_lessons"/>
-                            <field name="attended_lessons"/>
-                            <field name="state"/>
                         </list>
                     </field>
                 </page>

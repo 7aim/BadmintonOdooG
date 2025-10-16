@@ -1,6 +1,6 @@
 {
     'name': 'Volan Genclik',
-    'version': '2.4.6',
+    'version': '2.5.0',
     'summary': 'Badminton üçün tam idman idarəetmə sistemi',
 
     'author': 'Aim',
@@ -21,6 +21,7 @@
         'views/badminton_session_filter_views.xml',
         'views/badminton_session_views.xml',
         'views/badminton_sale_views.xml',
+        'views/badminton_package_views.xml',
         'views/badminton_lesson_freeze_views.xml',
         'views/badminton_lesson_simple_views.xml',
         'views/badminton_group_views.xml',

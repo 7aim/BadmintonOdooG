@@ -98,7 +98,8 @@
         <field name="model">badminton.attendance.check.line.genclik</field>
         <field name="arch" type="xml">
             <list string="İştirakçılar" editable="bottom">
-                <field name="partner_id" options="{'no_create': True}"/>
+                <field name="partner_id" options="{'no_create': True}"
+                       domain="[('is_company', '=', False), ('branch', '=', 'genclik')]"/>
                 <field name="lesson_id" invisible="1"/>
                 <field name="is_present"/>
                 <field name="notes"/>
