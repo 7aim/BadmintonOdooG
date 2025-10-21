@@ -19,9 +19,9 @@
                     <button name="action_unfreeze" string="Aktiv et" 
                             type="object" class="btn-info"
                             invisible="state != 'frozen'"/>
-                    <button name="action_complete" string="Tamamla" 
+                    <!--button name="action_complete" string="Tamamla" 
                             type="object" class="btn-secondary"
-                            invisible="state != 'active'"/>
+                            invisible="state != 'active'"/-->
                     <button name="action_cancel" string="Ləğv et" 
                             type="object" class="btn-danger"
                             invisible="state not in ['draft', 'active', 'frozen']"/>
@@ -44,7 +44,7 @@
                         <group>
                             <field name="start_date"/>
                             <field name="end_date"/>
-                            <field name="payment_date" readonly="1"/>
+                            <field name="payment_date"/>
                         </group>
                     </group>
                     

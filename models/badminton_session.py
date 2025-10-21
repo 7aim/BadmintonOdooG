@@ -15,9 +15,9 @@ class BadmintonSession(models.Model):
 
     name = fields.Char(string="Sessiya Nömrəsi", readonly=True, default="Yeni")
     partner_id = fields.Many2one('res.partner', string="Müştəri", required=True)
-    start_time = fields.Datetime(string="Başlama Vaxtı", readonly=True)
-    end_time = fields.Datetime(string="Bitmə Vaxtı")
-    duration_hours = fields.Float(string="Müddət (saat)", default=1.0)
+    start_time = fields.Datetime(string="Başlama Vaxtı", default=fields.Datetime.now, readonly=True)
+    end_time = fields.Datetime(string="Bitmə Vaxtı", compute='_compute_end_time', store=True, readonly=True)
+    duration_hours = fields.Float(string="Müddət (saat)", default=1.0, required=True)
 
     state = fields.Selection([
         ('draft', 'Gözləmədə'),
@@ -38,6 +38,15 @@ class BadmintonSession(models.Model):
     warn10_sent = fields.Boolean(string="10 dəq xəbərdarlığı göndərilib", default=False, index=True)
 
     # ---------- computed ----------
+    @api.depends('start_time', 'duration_hours')
+    def _compute_end_time(self):
+        """Başlama vaxtı və müddət əsasında bitmə vaxtını hesablayır"""
+        for rec in self:
+            if rec.start_time and rec.duration_hours:
+                rec.end_time = rec.start_time + timedelta(hours=rec.duration_hours)
+            else:
+                rec.end_time = False
+
     @api.depends('end_time', 'state')
     def _compute_time_expired(self):
         now = fields.Datetime.now()
@@ -59,7 +68,19 @@ class BadmintonSession(models.Model):
         for vals in vals_list:
             if vals.get('name', 'Yeni') == 'Yeni':
                 vals['name'] = self.env['ir.sequence'].next_by_code('badminton.session.genclik') or 'BS001'
-        return super().create(vals_list)
+            
+            # Əgər start_time verilməyibsə, indi təyin et
+            if not vals.get('start_time'):
+                vals['start_time'] = fields.Datetime.now()
+        
+        records = super().create(vals_list)
+        
+        # Əgər state='active' olaraq yaradılırsa, balansı avtomatik azalt
+        for rec in records:
+            if rec.state == 'active':
+                rec._deduct_balance_on_start()
+        
+        return records
 
     def write(self, vals):
         res = super().write(vals)
@@ -70,8 +91,10 @@ class BadmintonSession(models.Model):
         return res
 
     # ---------- helpers / flows ----------
-    def start_session_manual(self):
+    def _deduct_balance_on_start(self):
+        """Sessiya başladıqda balansı azaldır - daxili helper metod"""
         self.ensure_one()
+        
         if not self.partner_id:
             raise ValidationError('Zəhmət olmasa müştəri seçin!')
 
@@ -86,7 +109,8 @@ class BadmintonSession(models.Model):
 
         active = self.search([
             ('partner_id', '=', self.partner_id.id),
-            ('state', 'in', ['active', 'extended'])
+            ('state', 'in', ['active', 'extended']),
+            ('id', '!=', self.id)
         ], limit=1)
         if active:
             raise ValidationError(f'{self.partner_id.name} üçün artıq aktiv sessiya var!')
@@ -101,22 +125,33 @@ class BadmintonSession(models.Model):
             'balance_before': customer_balance,
             'balance_after': new_balance,
             'transaction_type': 'usage',
-            'description': f"Manual sessiya başladıldı: {self.name}"
+            'description': f"Sessiya başladıldı: {self.name}"
         })
 
+    def start_session_manual(self):
+        """Düymə ilə manual sessiya başlatma"""
+        self.ensure_one()
+        
+        # Balansı azalt
+        self._deduct_balance_on_start()
+        
+        # Vaxtları və state-i yenilə
         now = fields.Datetime.now()
-        self.start_time = now
-        self.end_time = now + timedelta(hours=self.duration_hours)
-        self.state = 'active'
-        self.qr_scanned = False
-        self.warn10_sent = False
+        self.write({
+            'start_time': now,
+            'end_time': now + timedelta(hours=self.duration_hours),
+            'state': 'active',
+            'qr_scanned': False,
+            'warn10_sent': False,
+        })
 
+        customer_balance = self.partner_id.badminton_balance
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'message': (f'{self.partner_id.name} üçün sessiya başladıldı! '
-                            f'Köhnə balans: {customer_balance}, Yeni balans: {new_balance} saat'),
+                            f'Yeni balans: {customer_balance} saat'),
                 'type': 'success',
                 'sticky': False,
             }

@@ -44,7 +44,7 @@
                     </group>
                     <group string="Ödəniş Məlumatları">
                         <group>
-                            <field name="payment_date" readonly="1"/>
+                            <field name="payment_date"/>
                         </group>
                         <group>
                             <field name="credited_hours" readonly="1"/>
