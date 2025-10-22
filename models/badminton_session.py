@@ -19,6 +19,11 @@ class BadmintonSession(models.Model):
     end_time = fields.Datetime(string="Bitmə Vaxtı", compute='_compute_end_time', store=True, readonly=True)
     duration_hours = fields.Float(string="Müddət (saat)", default=1.0, required=True)
 
+    promo_type = fields.Selection([
+        ('1fit', '1FIT'),
+        ('push30', 'PUSH30'),
+    ], string="Tətbiq")
+
     state = fields.Selection([
         ('draft', 'Gözləmədə'),
         ('active', 'Aktiv'),
@@ -98,6 +103,11 @@ class BadmintonSession(models.Model):
         if not self.partner_id:
             raise ValidationError('Zəhmət olmasa müştəri seçin!')
 
+        # Əgər promo_type varsa, balans azaltma
+        if self.promo_type:
+            _logger.info(f"Sessiya {self.name} tətbiq ({self.promo_type}) ilə başladıldı - balans azaldılmadı")
+            return
+            
         customer_balance = self.partner_id.badminton_balance or 0.0
         required_hours = float(self.duration_hours)
 

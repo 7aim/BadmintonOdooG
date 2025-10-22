@@ -40,6 +40,7 @@
                             <field name="partner_id" 
                                    domain="[('is_company', '=', False), ('branch', '=', 'genclik')]"
                                    required="1"/>
+                            <field name="promo_type"/>
                             <field name="duration_hours"/>
                             <field name="start_time" readonly="1"/>
                             <field name="end_time" readonly="1"/>
@@ -75,6 +76,7 @@
 
                 <field name="name"/>
                 <field name="partner_id"/>
+                <field name="promo_type"/>
                 <field name="start_time"/>
                 <field name="end_time"/>
                 <field name="completion_time"/>
@@ -97,6 +99,7 @@
                   decoration-danger="warn10_sent or time_expired"
                   create="false">
                 <field name="partner_id"/>
+                <field name="promo_type"/>
                 <field name="start_time"/>
                 <field name="end_time"/>
                 <field name="state"/>
