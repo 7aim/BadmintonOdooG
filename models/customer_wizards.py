@@ -51,8 +51,9 @@ class BadmintonSaleWizard(models.TransientModel):
     
     partner_id = fields.Many2one('res.partner', string="Müştəri", required=True)
     
-    # Paket seçimi
-    package_id = fields.Many2one('badminton.package.genclik', string="Paket")
+    # Paket seçimi - yalnız satış paketləri
+    package_id = fields.Many2one('badminton.package.genclik', string="Paket",
+                                  domain="[('package_type', '=', 'sale'), ('active', '=', True)]")
     is_student = fields.Boolean(string="Tələbədir", default=False)
     
     # Sadə satış
@@ -62,6 +63,10 @@ class BadmintonSaleWizard(models.TransientModel):
     ], string="Müştəri Növü", default='adult')
     hours_quantity = fields.Integer(string="Saat Sayı", default=1)
     unit_price = fields.Float(string="Saat Başı Qiymət", default=8.0)
+    
+    # Qiymət məlumatları
+    original_price = fields.Float(string="Endirimsiz Qiymət", readonly=True)
+    discount_percent = fields.Float(string="Endirim (%)", readonly=True)
     total_amount = fields.Float(string="Ümumi Məbləğ", store=True)
     
     # Müştərinin cari balansını göstər
@@ -71,12 +76,26 @@ class BadmintonSaleWizard(models.TransientModel):
     def _onchange_package(self):
         """Paket və müştəri növünə görə qiyməti təyin et"""
         if self.package_id:
+            # Endirimsiz qiyməti təyin et
             if self.is_student:
-                self.total_amount = self.package_id.student_price
+                self.original_price = self.package_id.student_price
             elif self.customer_type == 'child':
-                self.total_amount = self.package_id.child_price
+                self.original_price = self.package_id.child_price
             else:
-                self.total_amount = self.package_id.adult_price
+                self.original_price = self.package_id.adult_price
+            
+            # Endirim faizini təyin et
+            self.discount_percent = self.package_id.discount_percent
+            
+            # Endirimli qiyməti hesabla
+            if self.discount_percent > 0:
+                discount_amount = self.original_price * (self.discount_percent / 100)
+                self.total_amount = self.original_price - discount_amount
+            else:
+                self.total_amount = self.original_price
+        else:
+            self.original_price = 0
+            self.discount_percent = 0
     
     @api.onchange('customer_type')
     def _onchange_customer_type(self):

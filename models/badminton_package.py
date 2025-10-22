@@ -13,4 +13,11 @@ class BadmintonPackage(models.Model):
     student_price = fields.Float(string="Tələbə Qiyməti", required=True)
     balance_count = fields.Integer(string="Badminton Balans Sayı", required=True, default=1)
     
+    # Yeni sahələr
+    discount_percent = fields.Float(string="Endirim Faizi (%)", default=0.0)
+    package_type = fields.Selection([
+        ('sale', 'Satış Paketi'),
+        ('subscription', 'Abunəlik Paketi')
+    ], string="Paket Növü", required=True, default='sale')
+    
     active = fields.Boolean(string="Aktiv", default=True)

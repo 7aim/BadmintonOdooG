@@ -38,7 +38,9 @@
                         <group>
                             <field name="partner_id" options="{'no_create': True}" 
                                    domain="[('is_company', '=', False), ('branch', '=', 'genclik')]"/>
+                            <field name="package_id"/>
                             <field name="group_id" options="{'no_create': True}"/>
+                            <field name="original_price" invisible="original_price == 0"/>
                             <field name="lesson_fee"/>
                         </group>
                         <group>

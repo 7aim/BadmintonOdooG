@@ -12,6 +12,10 @@ class BadmintonLessonSimple(models.Model):
     partner_id = fields.Many2one('res.partner', string="Müştəri", required=True)
     group_id = fields.Many2one('badminton.group.genclik', string="Qrup")
     
+    # Paket seçimi - yalnız abunəlik paketləri
+    package_id = fields.Many2one('badminton.package.genclik', string="Abunəlik Paketi",
+                                  domain="[('package_type', '=', 'subscription'), ('active', '=', True)]")
+    
     # Dərs Qrafiki (həftənin günləri)
     schedule_ids = fields.One2many('badminton.lesson.schedule.simple.genclik', 'lesson_id', string="Həftəlik Qrafik")
     
@@ -21,6 +25,7 @@ class BadmintonLessonSimple(models.Model):
     
     # Ödəniş məlumatları
     lesson_fee = fields.Float(string="Aylıq Dərs Haqqı", default=100.0, store=True)
+    original_price = fields.Float(string="Endirimsiz Qiymət", readonly=True)
 
     # Tarix məlumatları
     start_date = fields.Date(string="Cari Dövr Başlama", required=True, default=fields.Date.today)
@@ -111,6 +116,23 @@ class BadmintonLessonSimple(models.Model):
             
             if schedule_vals:
                 self.schedule_ids = schedule_vals
+    
+    @api.onchange('package_id')
+    def _onchange_package_id(self):
+        """Paket seçildikdə avtomatik qiyməti təyin et"""
+        if self.package_id:
+            # Endirimsiz qiymət
+            original_price = self.package_id.adult_price
+            self.original_price = original_price
+            
+            # Endirim hesabla
+            if self.package_id.discount_percent > 0:
+                discount_amount = original_price * (self.package_id.discount_percent / 100)
+                self.lesson_fee = original_price - discount_amount
+            else:
+                self.lesson_fee = original_price
+        else:
+            self.original_price = 0.0
     
     @api.model
     def create(self, vals):

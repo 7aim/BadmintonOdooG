@@ -63,8 +63,14 @@
                         <field name="total_amount" style="font-weight: bold; color: #28a745;"/>
                     </group>
                 </group>
-                <group string="Ümumi Məbləğ" invisible="not package_id">
-                    <field name="total_amount" style="font-weight: bold; font-size: 18px; color: #28a745;"/>
+                <group string="Qiymət Məlumatları" invisible="not package_id">
+                    <group>
+                        <field name="original_price" readonly="1"/>
+                        <field name="discount_percent" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="total_amount" style="font-weight: bold; font-size: 18px; color: #28a745;"/>
+                    </group>
                 </group>
                 <footer>
                     <button name="action_create_sale" type="object" string="Satışı Tamamla" class="btn-primary"/>
