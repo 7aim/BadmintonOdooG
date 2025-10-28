@@ -62,7 +62,7 @@ class BadmintonSaleWizard(models.TransientModel):
         ('adult', 'Böyük')
     ], string="Müştəri Növü", default='adult')
     hours_quantity = fields.Integer(string="Saat Sayı", default=1)
-    unit_price = fields.Float(string="Saat Başı Qiymət", default=8.0)
+    unit_price = fields.Float(string="Saat Başı Qiymət", default=10.0)
     
     # Qiymət məlumatları
     original_price = fields.Float(string="Endirimsiz Qiymət", readonly=True)
@@ -123,8 +123,8 @@ class BadmintonSaleWizard(models.TransientModel):
         if not self.partner_id:
             raise ValidationError("Zəhmət olmasa müştəri seçin!")
         
-        if not self.total_amount or self.total_amount <= 0:
-            raise ValidationError("Ümumi məbləğ 0-dan böyük olmalıdır!")
+        #if not self.total_amount or self.total_amount <= 0:
+            #raise ValidationError("Ümumi məbləğ 0-dan böyük olmalıdır!")
         
         if self.package_id:
             # Paket sistemi
@@ -156,8 +156,8 @@ class BadmintonSaleWizard(models.TransientModel):
         # Badminton satışı yaradırıq
         sale = self.env['badminton.sale.genclik'].create(sale_data)
         
-        # Balansı artırırıq
-        self.partner_id.badminton_balance += balance_to_add
+        # QEYD: Balans avtomatik artırılır badminton.sale.genclik modelinin create() metodunda
+        # çünki state='paid' olaraq yaradılır
         
         package_name = self.package_id.name if self.package_id else f"{self.total_amount} AZN"
         
