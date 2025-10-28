@@ -5,6 +5,7 @@ from . import badminton_group
 from . import badminton_package
 from . import badminton_lesson_freeze
 from . import badminton_lesson_freeze_wizard
+from . import badminton_lesson_payment
 from . import badminton_lesson_simple
 from . import customer_wizards
 from . import qr_scanner
