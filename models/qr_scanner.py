@@ -12,6 +12,10 @@ class QRScannerWizard(models.TransientModel):
     session_id = fields.Many2one('badminton.session.genclik', string="Badminton Sessiyası", readonly=True)
     attendance_id = fields.Many2one('sport.attendance.genclik', string="Basketbol İştirakı", readonly=True)
     
+    # Müştəri məlumatları
+    partner_id = fields.Many2one('res.partner', string="Müştəri", readonly=True)
+    partner_image = fields.Binary(string="Müştəri Şəkli", related='partner_id.image_1920', readonly=True)
+    
     # Xidmət növü seçimi
     service_type = fields.Selection([
         ('badminton', 'Badminton'),
@@ -40,6 +44,9 @@ class QRScannerWizard(models.TransientModel):
                     self.result_message = f"❌ Xəta: ID={partner_id} olan müştəri tapılmadı!\nQR Kod: {qr_data}"
                     return self._return_wizard()
                 
+                # Müştəri məlumatını set et
+                self.partner_id = partner
+                
                 # ÖNCə AKTIV DƏRS ABUNƏLİYİNİ YOXLA
                 lesson_check = self._check_active_lesson(partner)
                 if lesson_check['has_lesson']:
@@ -64,32 +71,15 @@ class QRScannerWizard(models.TransientModel):
                     self.result_message = f"⚠️ Diqqət: {partner.name} üçün artıq aktiv badminton sessiyası var!\nSessiya: {active_session.name}\nBaşlama vaxtı: {active_session.start_time}"
                     return self._return_wizard()
                 
-                # Balansdan 1 saat çıx
-                new_balance = current_balance - required_hours
-                partner.badminton_balance = new_balance
-                
-                # Yeni sessiya yarat
+                # Gözləmədə statusunda yeni sessiya yarat (balans hələ azaldılmır)
                 session = self.env['badminton.session.genclik'].create({
                     'partner_id': partner_id,
-                    'start_time': fields.Datetime.now(),
-                    'end_time': fields.Datetime.now() + timedelta(hours=1),
-                    'state': 'active',
+                    'state': 'draft',  # Gözləmədə
                     'qr_scanned': True,
                     'duration_hours': 1.0,
                 })
                 
-                # Balans tarixçəsi yarat
-                self.env['badminton.balance.history.genclik'].create({
-                    'partner_id': partner_id,
-                    'session_id': session.id,
-                    'hours_used': required_hours,
-                    'balance_before': current_balance,
-                    'balance_after': new_balance,
-                    'transaction_type': 'usage',
-                    'description': f"QR kod ilə sessiya başladıldı: {session.name}"
-                })
-                
-                self.result_message = f"✅ BADMINTON UĞURLU!\n👤 Müştəri: {partner.name}\n🎮 Sessiya: {session.name}\n⏰ Başlama: {session.start_time}\n💰 Köhnə balans: {current_balance} saat\n💰 Yeni balans: {new_balance} saat"
+                self.result_message = f"✅ SESSİYA YARADILDI (Gözləmədə)!\n👤 Müştəri: {partner.name}\n🎮 Sessiya: {session.name}\n⚠️ Zəhmət olmasa 'Başlat' düyməsinə basın!\n💰 Balans: {current_balance} saat"
                 self.session_id = session.id
                 
                 return self._return_wizard()

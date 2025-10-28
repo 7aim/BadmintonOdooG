@@ -48,7 +48,7 @@
                         <field name="current_balance" readonly="1" style="font-weight: bold; color: #007bff;"/>
                     </group>
                     <group string="Paket Satışı">
-                        <field name="package_id" domain="[('active', '=', True)]"/>
+                        <field name="package_id" domain="[('active', '=', True), ('package_type', '=', 'sale')]"/>
                         <field name="customer_type" invisible="not package_id"/>
                         <field name="is_student" invisible="not package_id"/>
                     </group>
@@ -69,6 +69,8 @@
                         <field name="discount_percent" readonly="1"/>
                     </group>
                     <group>
+                        <field name="hours_quantity" string="Əlavə Ediləcək Balans (Saat)" readonly="1" 
+                               style="font-weight: bold; font-size: 16px; color: #007bff;"/>
                         <field name="total_amount" style="font-weight: bold; font-size: 18px; color: #28a745;"/>
                     </group>
                 </group>

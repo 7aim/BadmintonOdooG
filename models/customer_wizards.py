@@ -76,6 +76,10 @@ class BadmintonSaleWizard(models.TransientModel):
     def _onchange_package(self):
         """Paket və müştəri növünə görə qiyməti təyin et"""
         if self.package_id:
+
+            # Paketdən balansı hours_quantity-yə yaz
+            self.hours_quantity = self.package_id.balance_count
+
             # Endirimsiz qiyməti təyin et
             if self.is_student:
                 self.original_price = self.package_id.student_price
@@ -104,7 +108,7 @@ class BadmintonSaleWizard(models.TransientModel):
             if self.customer_type == 'child':
                 self.unit_price = 15.0
             else:
-                self.unit_price = 8.0
+                self.unit_price = 10.0
             self._calculate_total()
     
     @api.onchange('hours_quantity', 'unit_price')

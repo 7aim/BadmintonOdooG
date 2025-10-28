@@ -7,6 +7,14 @@
         <field name="arch" type="xml">
             <form string="QR Kod Scanner">
                 <sheet>
+                    <!-- Müştəri Şəkli -->
+                    <field name="partner_image" widget="image" class="oe_avatar" 
+                           invisible="not partner_id"
+                           style="max-width: 150px; max-height: 150px; margin: 0 auto; display: block;"/>
+                    
+                    <group invisible="not partner_id">
+                        <field name="partner_id" readonly="1" string="👤 Müştəri"/>
+                    </group>
                     
                     <group>
                         <field name="qr_code_input" 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Badminton Zal Kapasiteti -->
+        <record id="badminton_court_capacity" model="ir.config_parameter">
+            <field name="key">volan_genclikk.badminton_court_capacity</field>
+            <field name="value">6</field>
+        </record>
+    </data>
+</odoo>

@@ -15,8 +15,8 @@ class BadmintonSession(models.Model):
 
     name = fields.Char(string="Sessiya Nömrəsi", readonly=True, default="Yeni")
     partner_id = fields.Many2one('res.partner', string="Müştəri", required=True)
-    start_time = fields.Datetime(string="Başlama Vaxtı", default=fields.Datetime.now, readonly=True)
-    end_time = fields.Datetime(string="Bitmə Vaxtı", compute='_compute_end_time', store=True, readonly=True)
+    start_time = fields.Datetime(string="Başlama Vaxtı", readonly=True)
+    end_time = fields.Datetime(string="Bitmə Vaxtı", readonly=True)
     duration_hours = fields.Float(string="Müddət (saat)", default=1.0, required=True)
 
     promo_type = fields.Selection([
@@ -38,20 +38,15 @@ class BadmintonSession(models.Model):
     time_expired = fields.Boolean(string="Vaxt Bitib", compute="_compute_time_expired", store=False)
     completion_time = fields.Datetime(string="Tamamlanma Vaxtı")
     recently_completed = fields.Boolean(string="Son Tamamlanan", compute="_compute_recently_completed", store=True)
+    
+    # Növbə sistemi
+    queue_number = fields.Integer(string="Növbə", compute="_compute_queue_number", store=False, readonly=True)
+    created_at = fields.Datetime(string="Yaradılma Vaxtı", default=fields.Datetime.now, readonly=True)
 
     # one-time flag, чтобы не спамить одно и то же окончание
     warn10_sent = fields.Boolean(string="10 dəq xəbərdarlığı göndərilib", default=False, index=True)
 
     # ---------- computed ----------
-    @api.depends('start_time', 'duration_hours')
-    def _compute_end_time(self):
-        """Başlama vaxtı və müddət əsasında bitmə vaxtını hesablayır"""
-        for rec in self:
-            if rec.start_time and rec.duration_hours:
-                rec.end_time = rec.start_time + timedelta(hours=rec.duration_hours)
-            else:
-                rec.end_time = False
-
     @api.depends('end_time', 'state')
     def _compute_time_expired(self):
         now = fields.Datetime.now()
@@ -66,25 +61,68 @@ class BadmintonSession(models.Model):
                 r.recently_completed = (now - r.completion_time).total_seconds() < 900
             else:
                 r.recently_completed = False
+    
+    def _compute_queue_number(self):
+        """Gözləmədə olan sessiyalar üçün növbə nömrəsini hesabla"""
+        for rec in self:
+            if rec.state == 'draft':
+                # Gözləmədə olan və bu sessiyadan əvvəl yaradılmış sessiyaları say
+                queue_position = self.search_count([
+                    ('state', '=', 'draft'),
+                    ('created_at', '<', rec.created_at),
+                    ('id', '!=', rec.id)
+                ])
+                rec.queue_number = queue_position + 1
+            else:
+                rec.queue_number = 0
+    
+    def _get_max_capacity(self):
+        """Zal kapasiteti - System Parameter-dən oxunur"""
+        capacity = self.env['ir.config_parameter'].sudo().get_param(
+            'volan_genclikk.badminton_court_capacity', 
+            default='6'
+        )
+        return int(capacity)
+    
+    def _get_active_sessions_count(self):
+        """Hal-hazırda aktiv və uzadılmış sessiyaların sayı"""
+        return self.search_count([
+            ('state', 'in', ['active', 'extended'])
+        ])
+    
+    def _check_capacity(self):
+        """Zal kapasitetini yoxla"""
+        active_count = self._get_active_sessions_count()
+        max_capacity = self._get_max_capacity()
+        
+        if active_count >= max_capacity:
+            raise ValidationError(
+                f'⚠️ Zal doludur!\n'
+                f'Aktiv sessiyalar: {active_count}/{max_capacity}\n'
+                f'Zəhmət olmasa bir sessiya tamamlanana qədər gözləyin.'
+            )
+        
+        return True
 
     # ---------- lifecycle ----------
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            if vals.get('name', 'Yeni') == 'Yeni':
-                vals['name'] = self.env['ir.sequence'].next_by_code('badminton.session.genclik') or 'BS001'
+            # Müştəri ID əsasında name yarat: BS-MUSTERIID
+            if vals.get('partner_id'):
+                partner_id = vals['partner_id']
+                vals['name'] = f"BS-{partner_id}"
+            else:
+                vals['name'] = 'BS-0'  # Əgər müştəri yoxdursa
             
-            # Əgər start_time verilməyibsə, indi təyin et
-            if not vals.get('start_time'):
-                vals['start_time'] = fields.Datetime.now()
+            # Yaradılma vaxtını set et (növbə üçün lazım)
+            if not vals.get('created_at'):
+                vals['created_at'] = fields.Datetime.now()
+            
+            # Start time və end time yaratma zamanı set edilməsin
+            # Yalnız sessiya başladılanda set ediləcək
         
         records = super().create(vals_list)
-        
-        # Əgər state='active' olaraq yaradılırsa, balansı avtomatik azalt
-        for rec in records:
-            if rec.state == 'active':
-                rec._deduct_balance_on_start()
-        
         return records
 
     def write(self, vals):
@@ -142,20 +180,28 @@ class BadmintonSession(models.Model):
         """Düymə ilə manual sessiya başlatma"""
         self.ensure_one()
         
+        # ÖNCƏ: Zal kapasitetini yoxla
+        self._check_capacity()
+        
+        # Vaxtları set et
+        now = fields.Datetime.now()
+        end_time = now + timedelta(hours=self.duration_hours)
+        
         # Balansı azalt
         self._deduct_balance_on_start()
         
         # Vaxtları və state-i yenilə
-        now = fields.Datetime.now()
         self.write({
             'start_time': now,
-            'end_time': now + timedelta(hours=self.duration_hours),
+            'end_time': end_time,
             'state': 'active',
-            'qr_scanned': False,
             'warn10_sent': False,
         })
 
         customer_balance = self.partner_id.badminton_balance
+        
+        # Növbə nömrələrini yenilə (compute field olduğu üçün avtomatik olacaq)
+        
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -190,31 +236,21 @@ class BadmintonSession(models.Model):
             if active:
                 return {'status': 'error', 'message': f'{partner.name} üçün artıq aktiv sessiya var!'}
 
-            new_balance = customer_balance - required_hours
-            partner.badminton_balance = new_balance
+            # Gözləmədə statusunda sessiya yarat (balans azaltma!)
+            if customer_balance < required_hours:
+                return {'status': 'error',
+                        'message': f'{partner.name} müştərisinin kifayət qədər balansı yoxdur! Mövcud balans: {customer_balance} saat'}
 
             session = self.create({
                 'partner_id': partner_id,
-                'start_time': fields.Datetime.now(),
-                'end_time': fields.Datetime.now() + timedelta(hours=1),
-                'state': 'active',
+                'state': 'draft',  # Gözləmədə statusu
                 'qr_scanned': True,
-                'warn10_sent': False,
-            })
-
-            self.env['badminton.balance.history.genclik'].create({
-                'partner_id': partner_id,
-                'session_id': session.id,
-                'hours_used': required_hours,
-                'balance_before': customer_balance,
-                'balance_after': new_balance,
-                'transaction_type': 'usage',
-                'description': f"QR kod ilə sessiya başladıldı: {session.name}"
+                'duration_hours': 1.0,
             })
 
             return {'status': 'success',
-                    'message': (f'{partner.name} üçün sessiya başladıldı! '
-                                f'Köhnə balans: {customer_balance}, Yeni balans: {new_balance} saat'),
+                    'message': (f'{partner.name} üçün sessiya yaradıldı (Gözləmədə)! '
+                                f'Zəhmət olmasa "Başlat" düyməsinə basın.'),
                     'session_id': session.id}
         except Exception as e:
             return {'status': 'error', 'message': f'Xəta baş verdi: {str(e)}'}

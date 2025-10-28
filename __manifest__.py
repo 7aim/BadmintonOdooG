@@ -16,6 +16,7 @@
         'security/ir.model.access.csv',
         'data/sequence.xml',
         'data/cron_jobs.xml',
+        'data/badminton_settings.xml',
         #'views/res_partner_views.xml',
         'views/sport_system_views.xml',
         'views/badminton_session_filter_views.xml',

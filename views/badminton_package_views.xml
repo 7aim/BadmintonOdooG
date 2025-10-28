@@ -11,7 +11,6 @@
                         <group>
                             <field name="name"/>
                             <field name="package_type"/>
-                            <field name="balance_count" invisible="package_type != 'subscription'"/>
                         </group>
                         <group>
                             <field name="discount_percent"/>
@@ -24,6 +23,7 @@
                             <field name="child_price"/>
                         </group>
                         <group>
+                            <field name="balance_count" invisible="package_type == 'subscription'"/>
                             <field name="student_price"/>
                         </group>
                     </group>
@@ -44,7 +44,7 @@
                 <field name="adult_price"/>
                 <field name="child_price"/>
                 <field name="student_price"/>
-                <field name="balance_count" invisible="package_type != 'subscription'"/>
+                <field name="balance_count" invisible="package_type == 'subscription'"/>
                 <field name="active"/>
             </list>
         </field>
