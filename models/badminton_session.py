@@ -24,6 +24,12 @@ class BadmintonSession(models.Model):
         ('push30', 'PUSH30'),
     ], string="Tətbiq")
 
+    payment_type = fields.Selection([   
+        ('cash', 'Nağd'),
+        ('card', 'Kartdan karta'),
+        ('abonent', 'Abunəçi'),
+    ], string="Ödəniş Növü")
+
     state = fields.Selection([
         ('draft', 'Gözləmədə'),
         ('active', 'Aktiv'),
@@ -202,15 +208,10 @@ class BadmintonSession(models.Model):
         
         # Növbə nömrələrini yenilə (compute field olduğu üçün avtomatik olacaq)
         
+        # Səhifəni reload et ki, dəyişikliklər dərhal görünsün
         return {
             'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'message': (f'{self.partner_id.name} üçün sessiya başladıldı! '
-                            f'Yeni balans: {customer_balance} saat'),
-                'type': 'success',
-                'sticky': False,
-            }
+            'tag': 'reload',
         }
 
     def start_session_by_qr(self, qr_data):

@@ -45,6 +45,7 @@
                     <group string="Ödəniş Məlumatları">
                         <group>
                             <field name="payment_date"/>
+                            <field name="payment_method"/>
                         </group>
                         <group>
                             <field name="credited_hours" readonly="1"/>
@@ -68,6 +69,7 @@
                 <field name="partner_id"/>
                 <field name="customer_type"/>
                 <field name="package_type"/>
+                <field name="payment_method"/>
                 <field name="hours_quantity"/>
                 <field name="total_amount"/>
                 <field name="sale_date"/>
@@ -87,6 +89,7 @@
                 <field name="partner_id"/>
                 <field name="customer_type"/>
                 <field name="package_type"/>
+                <field name="payment_method"/>
                 <separator/>
                 <filter string="Uşaq" name="child" domain="[('customer_type','=','child')]"/>
                 <filter string="Böyük" name="adult" domain="[('customer_type','=','adult')]"/>

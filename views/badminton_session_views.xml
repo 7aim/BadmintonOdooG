@@ -7,6 +7,12 @@
         <field name="arch" type="xml">
             <form string="Badminton Sessiyası">
                 <header>
+                    <!-- Badminton Satışı düyməsi -->
+                    <button name="%(action_badminton_sale_wizard_genclik)d"
+                            string="💰 Badminton Satışı"
+                            type="action"
+                            class="btn-info"/>
+                            
                     <!-- Düymə: sessiya draft vəziyyətindədirsə "Başlat" göstər -->
                     <button name="start_session_manual"
                             string="Sessiyanı Başlat"
