@@ -83,10 +83,10 @@
               action="hr.open_view_employee_list_my" sequence="33" groups="volan_genclikk.group_genclik_admin"/>
     <menuitem id="menu_sport_config" name="⚙️ Tənzimləmələr" parent="menu_sport_main" sequence="40"
               groups="volan_genclikk.group_genclik_admin"/>
-    <menuitem id="menu_customer_lookup" name="Müştəri Axtarışı" parent="menu_sport_config" 
-              action="action_customer_lookup_wizard" sequence="1"/>
-    <menuitem id="menu_sport_branches" name="İdman Növləri" parent="menu_sport_config" 
-              action="action_sport_branch_genclik" sequence="2"/>
+    <!--menuitem id="menu_customer_lookup" name="Müştəri Axtarışı" parent="menu_sport_config" 
+              action="action_customer_lookup_wizard" sequence="1"/-->
+    <!--menuitem id="menu_sport_branches" name="İdman Növləri" parent="menu_sport_config" 
+              action="action_sport_branch_genclik" sequence="2"/-->
 
     <!-- Badminton Package Action -->
     <record id="action_badminton_package_genclik" model="ir.actions.act_window">

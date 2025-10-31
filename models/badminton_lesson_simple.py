@@ -163,29 +163,52 @@ class BadmintonLessonSimple(models.Model):
         else:
             vals['name'] = 'A-0'  # Müştəri yoxdursa
             
-        return super(BadmintonLessonSimple, self).create(vals)
+        lesson = super(BadmintonLessonSimple, self).create(vals)
+        
+        # Əgər yaradılan zaman state=active isə və ödəniş yoxdursa, avtomatik ilk ödəniş yarat
+        if lesson.state == 'active' and not lesson.payment_ids:
+            lesson._create_initial_payment()
+        
+        return lesson
+    
+    def write(self, vals):
+        """State dəyişdikdə (draft → active) avtomatik ödəniş yarat"""
+        result = super(BadmintonLessonSimple, self).write(vals)
+        
+        # Əgər state active-ə dəyişdirilirsə və ödəniş yoxdursa
+        if vals.get('state') == 'active':
+            for lesson in self:
+                if not lesson.payment_ids:
+                    lesson._create_initial_payment()
+        
+        return result
+    
+    def _create_initial_payment(self):
+        """İlk ödəniş sətirini yarat (helper method)"""
+        self.ensure_one()
+        
+        current_month = datetime.now().month
+        month_mapping = {
+            1: 'january', 2: 'february', 3: 'march', 4: 'april',
+            5: 'may', 6: 'june', 7: 'july', 8: 'august',
+            9: 'september', 10: 'october', 11: 'november', 12: 'december'
+        }
+        
+        self.env['badminton.lesson.payment.genclik'].create({
+            'lesson_id': self.id,
+            'payment_date': fields.Date.today(),
+            'payment_month': month_mapping.get(current_month, 'january'),
+            'amount': self.lesson_fee,
+            'payment_method_lesson': 'cash',  # Default olaraq nağd
+            'notes': 'İlk abunəlik ödənişi (avtomatik)'
+        })
     
     def action_confirm(self):
         """Dərsi təsdiqlə və ödənişi qəbul et"""
         for lesson in self:
             if lesson.state == 'draft':
                 lesson.state = 'active'
-                
-                # İlk ödəniş sətirini yarat
-                current_month = datetime.now().month
-                month_mapping = {
-                    1: 'january', 2: 'february', 3: 'march', 4: 'april',
-                    5: 'may', 6: 'june', 7: 'july', 8: 'august',
-                    9: 'september', 10: 'october', 11: 'november', 12: 'december'
-                }
-                
-                self.env['badminton.lesson.payment.genclik'].create({
-                    'lesson_id': lesson.id,
-                    'payment_date': fields.Date.today(),
-                    'payment_month': month_mapping.get(current_month, 'january'),
-                    'amount': lesson.lesson_fee,
-                    'notes': 'İlk abunəlik ödənişi'
-                })
+                # write() metodu avtomatik _create_initial_payment() çağıracaq
     
     def action_renew(self):
         """Abunəliyi 1 ay uzat və yenidən ödəniş qəbul et"""

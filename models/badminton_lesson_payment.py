@@ -12,7 +12,12 @@ class BadmintonLessonPayment(models.Model):
     lesson_id = fields.Many2one('badminton.lesson.simple.genclik', string="Dərs Abunəliyi", required=True, ondelete='cascade')
     partner_id = fields.Many2one(related='lesson_id.partner_id', string="Müştəri", store=True, readonly=True)
     
-    # Ödəniş tarixi
+    # Ödəniş
+    payment_method_lesson = fields.Selection([
+        ('cash', 'Nağd'),
+        ('card', 'Kartdan karta'),
+    ], string="Ödəniş Metodu", required=True)
+    
     payment_date = fields.Date(string="Ödəniş Tarixi", required=True, default=fields.Date.today)
     
     # Ödəniş ayı (çox vacib - kassaya təsir edəcək)

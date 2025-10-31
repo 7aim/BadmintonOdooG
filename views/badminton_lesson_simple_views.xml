@@ -67,6 +67,7 @@
                                 <list string="Ödənişlər" editable="bottom">
                                     <field name="payment_date"/>
                                     <field name="payment_month"/>
+                                    <field name="payment_method_lesson"/>
                                     <field name="amount"/>
                                     <field name="cash_flow_id" readonly="1" optional="hide"/>
                                     <field name="notes"/>

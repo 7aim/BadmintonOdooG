@@ -108,9 +108,16 @@ class QRScannerWizard(models.TransientModel):
             
             # İndi dərs vaxtında olub-olmadığını yoxla
             today = fields.Date.today()
-            current_time = fields.Datetime.now().time()
             current_weekday = str(today.weekday())  # 0=Bazar ertəsi, 6=Bazar
-            current_hour = current_time.hour + current_time.minute / 60.0
+            
+            # Azərbaycan vaxtını al (UTC+4)
+            import pytz
+            baku_tz = pytz.timezone('Asia/Baku')
+            current_time_utc = fields.Datetime.now()
+            current_time_baku = current_time_utc.astimezone(baku_tz)
+            current_hour = current_time_baku.hour
+            current_minute = current_time_baku.minute
+            current_time_float = current_hour + (current_minute / 60.0)
             
             # Bu günə aid qrafik var mı?
             matching_schedule = active_lesson.schedule_ids.filtered(
@@ -122,11 +129,11 @@ class QRScannerWizard(models.TransientModel):
             
             # Dərs vaxtında mı?
             for schedule in matching_schedule:
-                # 30 dəqiqə əvvəl və 30 dəqiqə sonra QR kodu qəbul et
-                start_with_buffer = schedule.start_time - 0.5  # 30 dəq əvvəl
-                end_with_buffer = schedule.end_time + 0.5     # 30 dəq sonra
+                # Dərsdən 1 saat əvvəl və dərsin sonuna qədər QR aktiv
+                start_with_buffer = schedule.start_time - 1.0  # 1 saat əvvəl
+                end_with_buffer = schedule.end_time            # Dərsin sonu
                 
-                if start_with_buffer <= current_hour <= end_with_buffer:
+                if start_with_buffer <= current_time_float <= end_with_buffer:
                     # Həftənin günü adlarını əlavə edək
                     day_names = {
                         '0': 'Bazar ertəsi',

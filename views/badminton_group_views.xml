@@ -8,6 +8,7 @@
             <form string="Badminton Qrupu">
                 <sheet>
                     <div class="oe_title">
+                        <field name="code"/>
                         <h1>
                             <field name="name" placeholder="Qrup adı..."/>
                         </h1>
@@ -73,8 +74,9 @@
         <field name="arch" type="xml">
             <list string="Badminton Qrupları" decoration-success="is_active==True" 
                   decoration-muted="is_active==False">
+                <field name="code"/>
                 <field name="name"/>
-                <field name="member_count"/>
+                <field name="member_count" sum="True"/>
                 <field name="is_active"/>
             </list>
         </field>
