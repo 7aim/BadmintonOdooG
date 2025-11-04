@@ -5,7 +5,7 @@ from odoo.exceptions import ValidationError
 class BadmintonGroup(models.Model):
     _name = 'badminton.group.genclik'
     _description = 'Badminton Qrupu'
-    _order = 'code_number, name'
+    _order = 'name DESC, code_number'
     
     code = fields.Char(string="Qrup Kodu", readonly=True, default="Yeni")
     code_number = fields.Integer(string="Kod Nömrəsi", compute="_compute_code_number", store=True, help="Q-1 → 1, Q-10 → 10")
