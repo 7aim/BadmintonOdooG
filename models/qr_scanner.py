@@ -78,8 +78,8 @@ class QRScannerWizard(models.TransientModel):
                     'qr_scanned': True,
                     'duration_hours': 1.0,
                 })
-                
-                self.result_message = f"✅ SESSİYA YARADILDI (Gözləmədə)!\n👤 Müştəri: {partner.name}\n🎮 Sessiya: {session.name}\n⚠️ Zəhmət olmasa 'Başlat' düyməsinə basın!\n💰 Balans: {current_balance} saat"
+
+                self.result_message = f"✅ SESSİYA YARADILDI (Gözləmədə)!\n👤 Müştəri: {partner.name}\n🎮 Sessiya: {session.name}\n⚠️ Zəhmət olmasa 'Başlat' düyməsinə basın!\n💰 Balans: {current_balance} saat\n 🔢 Növbə: {session.queue_number}"
                 self.session_id = session.id
                 
                 return self._return_wizard()

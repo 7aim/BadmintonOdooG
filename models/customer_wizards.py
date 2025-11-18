@@ -54,7 +54,6 @@ class BadmintonSaleWizard(models.TransientModel):
     # Paket seçimi - yalnız satış paketləri
     package_id = fields.Many2one('badminton.package.genclik', string="Paket",
                                   domain="[('package_type', '=', 'sale'), ('active', '=', True)]")
-    is_student = fields.Boolean(string="Tələbədir", default=False)
     
     # Sadə satış
     customer_type = fields.Selection([
@@ -79,7 +78,7 @@ class BadmintonSaleWizard(models.TransientModel):
     # Müştərinin cari balansını göstər
     current_balance = fields.Integer(string="Cari Balans", related='partner_id.badminton_balance', readonly=True)
     
-    @api.onchange('package_id', 'customer_type', 'is_student')
+    @api.onchange('package_id', 'customer_type')
     def _onchange_package(self):
         """Paket və müştəri növünə görə qiyməti təyin et"""
         if self.package_id:
@@ -88,9 +87,7 @@ class BadmintonSaleWizard(models.TransientModel):
             self.hours_quantity = self.package_id.balance_count
 
             # Endirimsiz qiyməti təyin et
-            if self.is_student:
-                self.original_price = self.package_id.student_price
-            elif self.customer_type == 'child':
+            if self.customer_type == 'child':
                 self.original_price = self.package_id.child_price
             else:
                 self.original_price = self.package_id.adult_price

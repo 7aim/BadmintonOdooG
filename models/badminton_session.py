@@ -22,6 +22,7 @@ class BadmintonSession(models.Model):
     promo_type = fields.Selection([
         ('1fit', '1FIT'),
         ('push30', 'PUSH30'),
+        ('tripsome', 'Tripsome')
     ], string="Tətbiq")
 
     payment_type = fields.Selection([   

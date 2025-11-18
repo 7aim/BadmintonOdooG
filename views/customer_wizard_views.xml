@@ -51,7 +51,6 @@
                         <field name="package_id" domain="[('active', '=', True), ('package_type', '=', 'sale')]"/>
                         <field name="payment_method"/>
                         <field name="customer_type" invisible="not package_id"/>
-                        <field name="is_student" invisible="not package_id"/>
                     </group>
                 </group>
                 <group string="Sadə Satış (Paket seçilmədikdə)" invisible="package_id">

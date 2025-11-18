@@ -10,7 +10,6 @@ class BadmintonPackage(models.Model):
     name = fields.Char(string="Paket Adı", required=True)
     adult_price = fields.Float(string="Böyük Qiyməti", required=True)
     child_price = fields.Float(string="Kiçik Qiyməti", required=True)
-    student_price = fields.Float(string="Tələbə Qiyməti", required=True)
     balance_count = fields.Integer(string="Badminton Balans Sayı", required=True, default=1)
     
     # Yeni sahələr
