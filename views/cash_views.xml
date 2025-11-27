@@ -104,7 +104,7 @@
         <field name="name">volan.cash.balance.genclik.form</field>
         <field name="model">volan.cash.balance.genclik</field>
         <field name="arch" type="xml">
-            <form string="Kassa Balansı">
+            <form string="Kassa Balansı" create="false" edit="false">
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_refresh" type="object" string="Yenilə" 
@@ -157,6 +157,7 @@
         <field name="res_model">volan.cash.balance.genclik</field>
         <field name="view_mode">form</field>
         <field name="target">main</field>
+        <field name="context">{'create': False}</field>
     </record>
 
     <!-- Main Menuitem -->

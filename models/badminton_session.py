@@ -51,7 +51,7 @@ class BadmintonSession(models.Model):
     created_at = fields.Datetime(string="Yaradılma Vaxtı", default=fields.Datetime.now, readonly=True)
 
     # one-time flag, чтобы не спамить одно и то же окончание
-    warn10_sent = fields.Boolean(string="10 dəq xəbərdarlığı göndərilib", default=False, index=True)
+    warn10_sent = fields.Boolean(string="5 dəq xəbərdarlığı göndərilib", default=False, index=True)
 
     # ---------- computed ----------
     @api.depends('end_time', 'state')
@@ -307,9 +307,9 @@ class BadmintonSession(models.Model):
 
 
     @api.model
-    def cron_send_session_warnings(self, warning_minutes=10):
+    def cron_send_session_warnings(self, warning_minutes=5):
         """
-        Крон: уведомляем за ~10 минут до конца через Odoo Bot.
+        Крон: уведомляем за ~5 минут до конца через Odoo Bot.
         """
         now = fields.Datetime.now()
         limit_dt = now + timedelta(minutes=warning_minutes)
