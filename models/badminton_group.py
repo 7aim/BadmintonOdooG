@@ -48,10 +48,12 @@ class BadmintonGroup(models.Model):
         
         return super(BadmintonGroup, self).create(vals)
 
-    @api.depends('member_ids')
+    @api.depends('member_ids', 'member_ids.state', 'member_ids.partner_id')
     def _compute_member_count(self):
         for group in self:
-            group.member_count = len(group.member_ids.filtered(lambda l: l.state in ['active', 'frozen']))
+            active_members = group.member_ids.filtered(lambda l: l.state in ['active', 'frozen'])
+            unique_partners = active_members.mapped('partner_id')
+            group.member_count = len(unique_partners)
 
 
 class BadmintonGroupSchedule(models.Model):
