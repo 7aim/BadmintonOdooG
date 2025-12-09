@@ -18,6 +18,7 @@ class BadmintonGroup(models.Model):
     # Qrup üzvləri
     member_ids = fields.One2many('badminton.lesson.simple.genclik', 'group_id', string="Qrup Üzvləri")
     member_count = fields.Integer(string="Üzv Sayı", compute='_compute_member_count')
+    unique_new_members_count = fields.Integer(string="Yeni Unikal Üzv", compute='_compute_unique_new_members', store=False)
     
     # Aktivlik
     is_active = fields.Boolean(string="Aktiv", default=True)
@@ -54,6 +55,26 @@ class BadmintonGroup(models.Model):
             active_members = group.member_ids.filtered(lambda l: l.state in ['active', 'frozen'])
             unique_partners = active_members.mapped('partner_id')
             group.member_count = len(unique_partners)
+    
+    def _compute_unique_new_members(self):
+        """Hər qrupda yalnız yeni (əvvəlki qruplarda olmayan) müştəriləri say"""
+        all_groups = self.search([('is_active', '=', True)], order='name DESC, code_number')
+        seen_partners = set()
+        
+        for group in all_groups:
+            if group.id in self.ids:
+                active_members = group.member_ids.filtered(lambda l: l.state in ['active', 'frozen'])
+                group_partners = set(active_members.mapped('partner_id').ids)
+                
+                # Bu qrupda yeni olan müştəriləri tap
+                new_partners = group_partners - seen_partners
+                group.unique_new_members_count = len(new_partners)
+                
+                # Bu qrupun bütün müştərilərini seen_partners-ə əlavə et
+                seen_partners.update(group_partners)
+            else:
+                active_members = group.member_ids.filtered(lambda l: l.state in ['active', 'frozen'])
+                seen_partners.update(active_members.mapped('partner_id').ids)
 
 
 class BadmintonGroupSchedule(models.Model):

@@ -10,9 +10,9 @@
                     <button name="action_confirm" string="Təsdiqlə" 
                             type="object" class="btn-primary"
                             invisible="state != 'draft'"/>
-                    <button name="action_renew" string="Yenilə (+1 ay)" 
+                    <!--button name="action_renew" string="Yenilə (+1 ay)" 
                             type="object" class="btn-success"
-                            invisible="state != 'active'"/>
+                            invisible="state != 'active'"/-->
                     <button name="action_freeze" string="Dondur" 
                             type="object" class="btn-warning"
                             invisible="state != 'active'"/>

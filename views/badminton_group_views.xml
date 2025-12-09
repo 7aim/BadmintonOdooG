@@ -76,7 +76,8 @@
                   decoration-muted="is_active==False">
                 <field name="code"/>
                 <field name="name"/>
-                <field name="member_count" sum="True"/>
+                <field name="member_count" string="Qrup Üzvləri"/>
+                <field name="unique_new_members_count" string="Yeni Unikal" sum="Cəm Unikal"/>
                 <field name="is_active"/>
             </list>
         </field>
