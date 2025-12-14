@@ -4,7 +4,7 @@ from odoo import models, fields, api
 
 class BadmintonPackage(models.Model):
     _name = 'badminton.package.genclik'
-    _description = 'Badminton Paketləri - Gənclik'
+    _description = 'Badminton Paketləri'
     _order = 'name'
 
     name = fields.Char(string="Paket Adı", required=True)
@@ -16,7 +16,10 @@ class BadmintonPackage(models.Model):
     discount_percent = fields.Float(string="Endirim Faizi (%)", default=0.0)
     package_type = fields.Selection([
         ('sale', 'Satış Paketi'),
-        ('subscription', 'Abunəlik Paketi')
+        #('subscription', 'Dərs Paketi'),
+        ('monthly', 'Abunəlik Paketlər')
     ], string="Paket Növü", required=True, default='sale')
+    is_gedis_package = fields.Boolean(string="Gediş Paketi",
+                                      help="Bu aylıq paket üçün hər sessiya 2 balans sərf edir")
     
     active = fields.Boolean(string="Aktiv", default=True)

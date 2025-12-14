@@ -10,10 +10,43 @@
     margin-left: 0.5rem !important;
 }
 
-.mt-2 {
-    margin-top: 0.5rem !important;
-}
-
 .mt-3 {
     margin-top: 1rem !important;
+}
+
+/* Yalnız Aktiv Sessiyalar tree view-u üçün qırmızı arxa plan */
+.o_list_view.genclikk-active-sessions-list .o_list_renderer tbody tr.o_data_row.text-danger td.o_data_cell,
+.o_list_view.genclikk-active-sessions-list .o_list_renderer tbody tr.o_data_row.text-danger td.o_data_cell .o_field_widget,
+.o_list_view.genclikk-active-sessions-list .o_list_renderer tbody tr.o_data_row.text-danger td.o_data_cell input {
+    background: #c62828 !important;
+    color: #ffffff !important;
+}
+
+.o_list_view.genclikk-active-sessions-list .o_list_renderer tbody tr.o_data_row.text-danger,
+.o_list_view.genclikk-active-sessions-list .o_list_renderer tbody tr.o_data_row.text-danger .btn,
+.o_list_view.genclikk-active-sessions-list .o_list_renderer tbody tr.o_data_row.text-danger button,
+.o_list_view.genclikk-active-sessions-list .o_list_renderer tbody tr.o_data_row.text-danger i {
+    color: #ffffff !important;
+}
+
+/* Yalnız Badminton və Basketbol abunəlik listlərində ödəniş xəbərdarlığı üçün qırmızı arxa plan */
+.o_list_view.genclikk-badminton-subscription-list .o_list_renderer tbody tr.o_data_row.text-danger td.o_data_cell,
+.o_list_view.genclikk-badminton-subscription-list .o_list_renderer tbody tr.o_data_row.text-danger td.o_data_cell .o_field_widget,
+.o_list_view.genclikk-badminton-subscription-list .o_list_renderer tbody tr.o_data_row.text-danger td.o_data_cell input,
+.o_list_view.genclikk-basketball-subscription-list .o_list_renderer tbody tr.o_data_row.text-danger td.o_data_cell,
+.o_list_view.genclikk-basketball-subscription-list .o_list_renderer tbody tr.o_data_row.text-danger td.o_data_cell .o_field_widget,
+.o_list_view.genclikk-basketball-subscription-list .o_list_renderer tbody tr.o_data_row.text-danger td.o_data_cell input {
+    background: #d88729 !important;
+    color: #ffffff !important;
+}
+
+.o_list_view.genclikk-badminton-subscription-list .o_list_renderer tbody tr.o_data_row.text-danger,
+.o_list_view.genclikk-badminton-subscription-list .o_list_renderer tbody tr.o_data_row.text-danger .btn,
+.o_list_view.genclikk-badminton-subscription-list .o_list_renderer tbody tr.o_data_row.text-danger button,
+.o_list_view.genclikk-badminton-subscription-list .o_list_renderer tbody tr.o_data_row.text-danger i,
+.o_list_view.genclikk-basketball-subscription-list .o_list_renderer tbody tr.o_data_row.text-danger,
+.o_list_view.genclikk-basketball-subscription-list .o_list_renderer tbody tr.o_data_row.text-danger .btn,
+.o_list_view.genclikk-basketball-subscription-list .o_list_renderer tbody tr.o_data_row.text-danger button,
+.o_list_view.genclikk-basketball-subscription-list .o_list_renderer tbody tr.o_data_row.text-danger i {
+    color: #ffffff !important;
 }

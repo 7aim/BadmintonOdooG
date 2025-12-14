@@ -59,6 +59,7 @@
                 <separator/>
                 <filter string="Badminton Satışı" name="badminton_sale" domain="[('category', '=', 'badminton_sale')]"/>
                 <filter string="Badminton Dərs" name="badminton_lesson" domain="[('category', '=', 'badminton_lesson')]"/>
+                <filter string="Basketbol Dərs" name="basketball_lesson" domain="[('category', '=', 'basketball_lesson')]"/>
                 <filter string="Digər" name="other" domain="[('category', '=', 'other')]"/>
                 <separator/>
                 <filter string="Bu gün" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
@@ -99,46 +100,6 @@
         </field>
     </record>
 
-    <!-- Cash Balance Form View -->
-    <record id="view_volan_cash_balance_genclik_form" model="ir.ui.view">
-        <field name="name">volan.cash.balance.genclik.form</field>
-        <field name="model">volan.cash.balance.genclik</field>
-        <field name="arch" type="xml">
-            <form string="Kassa Balansı" create="false" edit="false">
-                <sheet>
-                    <div class="oe_button_box" name="button_box">
-                        <button name="action_refresh" type="object" string="Yenilə" 
-                                icon="fa-refresh" class="oe_stat_button"/>
-                        <button name="generate_cash_report" type="object" string="Hesabat" 
-                                icon="fa-bar-chart" class="oe_stat_button"/>
-                    </div>
-                    <div class="oe_title">
-                        <h1>Volan Genclik - Kassa Hesabatı</h1>
-                    </div>
-                    <group>
-                        <group>
-                            <field name="date_filter" widget="selection"/>
-                            <field name="date_from" invisible="date_filter != 'custom'" 
-                                required="date_filter == 'custom'" colspan="2"/>
-                            <field name="date_to" invisible="date_filter != 'custom'" 
-                                required="date_filter == 'custom'" colspan="2"/>                 
-                        </group>
-                    </group>
-                    <group string="Gəlir Məlumatları">
-                        <field name="badminton_sales_income" widget="monetary"/>
-                        <field name="badminton_lessons_income" widget="monetary"/>
-                        <field name="other_income" widget="monetary"/>
-                    </group>
-                    <group string="Ümumi Məlumatlar">
-                        <field name="total_income" widget="monetary" style="color: green;"/>
-                        <field name="total_expenses" widget="monetary" style="color: red;"/>
-                        <field name="current_balance" widget="monetary" class="oe_subtotal_footer_separator" style="font-weight: bold;"/>
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
-
     <!-- Action for Cash Flow -->
     <record id="action_volan_cash_flow_genclik" model="ir.actions.act_window">
         <field name="name">Kassa Əməliyyatları</field>
@@ -154,13 +115,138 @@
     <!-- Action for Cash Balance -->
     <record id="action_volan_cash_balance_genclik" model="ir.actions.act_window">
         <field name="name">Kassa Balansı</field>
-        <field name="res_model">volan.cash.balance.genclik</field>
+        <field name="res_model">badminton.cash.balance.genclik</field>
         <field name="view_mode">form</field>
         <field name="target">main</field>
         <field name="context">{'create': False}</field>
     </record>
 
+    <!-- Badminton Cash Balance Form View -->
+    <record id="view_badminton_cash_balance_genclik_form" model="ir.ui.view">
+        <field name="name">badminton.cash.balance.genclik.form</field>
+        <field name="model">badminton.cash.balance.genclik</field>
+        <field name="arch" type="xml">
+            <form string="Badminton Kassa Balansı" create="false" edit="false">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_refresh" type="object" string="Yenilə" 
+                                icon="fa-refresh" class="oe_stat_button"/>
+                    </div>
+                    <div class="oe_title">
+                        <h1>🏸 Badminton - Kassa Hesabatı</h1>
+                    </div>
+                    <group>
+                        <group>
+                            <!--field name="date_filter" widget="selection"/-->
+                            <field name="date_from" invisible="date_filter != 'custom'" 
+                                   required="date_filter == 'custom'" colspan="2"/>
+                            <field name="date_to" invisible="date_filter != 'custom'" 
+                                   required="date_filter == 'custom'" colspan="2"/>                 
+                        </group>
+                    </group>
+                    <group>
+                        <group string="🏸 Abunəlik Gəliri">
+                            <group>
+                                <field name="subscription_cash_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                                <field name="subscription_card_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #2874a7ff;"/>
+                                <field name="subscription_total_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                                <field name="delayed_payments_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #ff6b6b;"/>
+                            </group>
+                        </group>
+                        <group string="🏸 Badminton Satışı">
+                            <group>
+                                <field name="badminton_sale_cash_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                                <field name="badminton_sale_card_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #2874a7ff;"/>
+                                <field name="badminton_sale_abonent_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #6c757d;"/>
+                                <field name="badminton_sale_total_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #17a2b8;"/>
+                            </group>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="🏷️ Digər Mədaxil/Məxaric">
+                            <group>
+                                <field name="other_income_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                                <field name="other_expense_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #a72828ff;"/>
+                                <field name="other_net_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                            </group>
+                        </group>
+                        <group string="🧾 Ümumi Nəticə">
+                            <group>
+                                <field name="overall_cash_income" widget="monetary" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                                <field name="overall_card_income" widget="monetary" style="font-size: 18px; font-weight: bold; color: #2874a7ff;"/>
+                                <field name="overall_total_income" widget="monetary" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                            </group>
+                        </group>
+                        <group string="🏦 Kassa Balansı">
+                            <group>
+                                <field name="cashbox_balance" widget="monetary" style="font-size: 18px; font-weight: bold; color: #ff9800;"/>
+                            </group>
+                        </group>
+                        <group string="🧾 İlkin Qalıq">
+                            <group>
+                                <field name="initial_balance" widget="monetary" style="font-size: 18px; font-weight: bold; color: #6c757d;"/>
+                            </group>
+                        </group>
+                        <group string="📊 Giriş Hesabatı">
+                            <group>
+                                <field name="cash_entries" string="💵 Nağd" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                                <field name="card_entries" string="💳 Card to card" style="font-size: 18px; font-weight: bold; color: #007bff;"/>
+                                <field name="abonent_entries" string="🎫 Abunəçi" style="font-size: 18px; font-weight: bold; color: #6c757d;"/>
+                            </group>
+                        </group>
+                        <group string="📊 Tətbiq Hesabatı">
+                            <group>
+                                <field name="onefit_entries" string="🏃 1fit" style="font-size: 18px; font-weight: bold; color: #ffc107;"/>
+                                <field name="push30_entries" string="⚡ Push30" style="font-size: 18px; font-weight: bold; color: #ffc107;"/>
+                                <field name="push30_plus_entries" string="⚡ Push30+" style="font-size: 18px; font-weight: bold; color: #ffc107;"/>
+                                <field name="tripsome_entries" string="🚗 Tripsome" style="font-size: 18px; font-weight: bold; color: #ffc107;"/>
+                                <field name="total_entries" string="📈 Ümumi giriş sayı" style="font-size: 20px; font-weight: bold; color: #17a2b8;"/>
+                            </group>
+                        </group>
+                        <group string="⛹️‍♂️ Uşaq Sayı">
+                            <group>
+                                <field name="total_children_count" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                            </group>
+                        </group>
+                        <group string="🆕 Yeni Uşaqlar">
+                            <group>
+                                <field name="new_children_count" style="font-size: 18px; font-weight: bold; color: #2874a7ff;"/>
+                            </group>
+                        </group>
+                    </group>   
+                </sheet>
+                <footer> <!-- Kassa Wizard Feature -->
+                    <button string="Bağla" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
     <!-- Main Menuitem -->
+    <record id="action_badminton_cash_balance" model="ir.actions.act_window">
+        <field name="name">Badminton Kassa Hesabatı</field>
+        <field name="res_model">badminton.cash.balance.genclik</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'dialog_size': 'large'}</field>
+    </record>
+
+    <record id="action_badminton_cash_flow" model="ir.actions.act_window">
+        <field name="name">Badminton Kassa Əməliyyatları</field>
+        <field name="res_model">volan.cash.flow.genclik</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+        <field name="domain">[('sport_type', '=', 'badminton')]</field>
+        <field name="context">{'default_sport_type': 'badminton', 'default_transaction_type': 'income'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                İlk badminton kassa əməliyyatınızı yaradın!
+            </p>
+            <p>
+                Yalnız badminton ilə bağlı gəlir və xərclər burada qeyd olunur.
+            </p>
+        </field>
+    </record>
+
     <menuitem id="menu_cash" name="💰 Kassa" parent="menu_sport_main" sequence="35"/>
 
     <!-- Cash Submenu -->

@@ -16,6 +16,7 @@
                             <field name="phone"/>
                             <field name="mobile"/>
                             <field name="badminton_balance" string="Badminton Balansı"/>
+                            <field name="monthly_balance_hours" string="Aylıq Balans (saat)"/>
                         </list>
                     </field>
                 </group>
@@ -44,13 +45,18 @@
                 <group>
                     <group string="Müştəri Məlumatları">
                         <field name="partner_id" options="{'no_create': True}" required="1"
-                               domain="[('is_company', '=', False), ('branch', '=', 'genclik')]"/>
+                               domain="[('is_company', '=', False), ('sport_type', 'in', ['badminton', 'both']), ('branch', '=', 'genclik')]"
+                               context="{'default_branch': 'genclik', 'default_sport_type': 'badminton'}"/>
                         <field name="current_balance" readonly="1" style="font-weight: bold; color: #007bff;"/>
+                        <field name="monthly_balance_hours" readonly="1" string="Aylıq Balans (saat)"
+                               invisible="[(monthly_balance_hours == 0)]"/>
+                        <field name="customer_deposit_balance" readonly="1" style="font-weight: bold; color: #28a745;" string="Depozit Balansı"/>
                     </group>
                     <group string="Paket Satışı">
-                        <field name="package_id" domain="[('active', '=', True), ('package_type', '=', 'sale')]"/>
+                        <field name="package_id" domain="[('active', '=', True), ('package_type', 'in', ['sale', 'monthly'])]"/>
                         <field name="payment_method"/>
                         <field name="customer_type" invisible="not package_id"/>
+                        <field name="is_gedis_package" readonly="1" invisible="[(package_id == False)]"/>
                     </group>
                 </group>
                 <group string="Sadə Satış (Paket seçilmədikdə)" invisible="package_id">
@@ -72,6 +78,16 @@
                         <field name="hours_quantity" string="Əlavə Ediləcək Balans (Saat)" readonly="1" 
                                style="font-weight: bold; font-size: 16px; color: #007bff;"/>
                         <field name="total_amount" style="font-weight: bold; font-size: 18px; color: #28a745;"/>
+                    </group>
+                </group>
+                <group string="Depozit və Ödəniş">
+                    <group>
+                        <field name="amount_to_pay" readonly="1" style="font-size: 16px; font-weight: bold; color: #ff9800;"/>
+                        <field name="amount_paid" style="font-size: 16px; font-weight: bold; color: #17a2b8;"/>
+                    </group>
+                    <group>
+                        <field name="deposit_used" readonly="1" style="font-weight: bold; color: #dc3545;"/>
+                        <field name="deposit_added" readonly="1" style="font-weight: bold; color: #007bff;"/>
                     </group>
                 </group>
                 <footer>

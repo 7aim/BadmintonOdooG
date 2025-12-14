@@ -9,10 +9,11 @@
                 <header>
                     <!-- Badminton Satışı düyməsi -->
                     <button name="%(action_badminton_sale_wizard_genclik)d"
-                            string="💰 Badminton Satışı"
+                            string="Balans Yüklə"
                             type="action"
-                            class="btn-info"/>
-                            
+                            class="btn-info"
+                            context="{'default_partner_id': partner_id}"/>
+                    
                     <!-- Düymə: sessiya draft vəziyyətindədirsə "Başlat" göstər -->
                     <button name="start_session_manual"
                             string="Sessiyanı Başlat"
@@ -47,8 +48,10 @@
                     <group>
                         <group>
                             <field name="partner_id" 
-                                   domain="[('is_company', '=', False), ('branch', '=', 'genclik')]"
+                                   domain="[('is_company', '=', False), ('sport_type', 'in', ['badminton', 'both']), ('branch', '=', 'genclik')]"
+                                   context="{'default_branch': 'genclik', 'default_sport_type': 'badminton'}"
                                    required="1"/>
+                            <field name="session_package_id" invisible="partner_id == False"/>
                             <field name="promo_type"/>
                             <field name="payment_type"/>
                             <field name="duration_hours"/>
@@ -86,6 +89,7 @@
 
                 <field name="name"/>
                 <field name="partner_id"/>
+                <field name="session_package_id"/>
                 <field name="promo_type"/>
                 <field name="payment_type"/>
                 <field name="start_time"/>
@@ -105,14 +109,16 @@
         <field name="model">badminton.session.genclik</field>
         <field name="arch" type="xml">
             <list string="Aktiv Sessiyalar"
+                  class="genclikk-active-sessions-list"
                   decoration-muted="state=='draft'"
-                  decoration-warning="state=='active' and not time_expired and not warn10_sent"
+                  decoration-success="state=='active' and not time_expired and not warn10_sent"
                   decoration-info="state=='extended' and not time_expired and not warn10_sent"
                   decoration-danger="warn10_sent or time_expired"
                   create="false"
                   default_order="created_at asc">
                 <field name="queue_number" string="Növbə" invisible="state != 'draft'"/>
                 <field name="partner_id"/>
+                <field name="session_package_id"/>
                 <field name="promo_type"/>
                 <field name="payment_type"/>
                 <field name="start_time"/>
@@ -143,7 +149,7 @@
                     </div>
                     <group>
                         <field name="partner_id" string="Müştəri Seçin (Manual)"
-                               domain="[('is_company', '=', False), ('branch', '=', 'genclik')]"/>
+                               domain="[('is_company', '=', False), ('sport_type', 'in', ['badminton', 'both']), ('branch', '=', 'genclik')]"/>
                         <field name="duration_hours"/>
                     </group>
                     <footer>
@@ -161,6 +167,7 @@
         <field name="name">Bütün Sessiyalar</field>
         <field name="res_model">badminton.session.genclik</field>
         <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_badminton_session_genclik_list"/> <!-- ƏSAS SƏTİR -->
         <field name="context">{}</field>
     </record>
 
@@ -170,7 +177,10 @@
         <field name="view_mode">list,form</field>
         <field name="view_id" ref="view_active_sessions_list"/>
         <field name="domain">[('state', 'in', ['draft', 'active', 'extended'])]</field>
-        <field name="context">{'create': False}</field>
+        <field name="context">{
+            'create': False,
+            'search_default_order_by_queue': 1
+        }</field>
     </record>
 
     <record id="action_qr_scanner" model="ir.actions.act_window">

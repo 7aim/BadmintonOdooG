@@ -28,8 +28,9 @@
                     <group>
                         <group>
                             <field name="partner_id" options="{'no_create': True}" 
-                                   domain="[('is_company', '=', False), ('branch', '=', 'genclik')]"/>
+                                   domain="[('is_company', '=', False), ('sport_type', 'in', ['badminton', 'both']), ('branch', '=', 'genclik')]"/>
                             <field name="customer_type"/>
+                            <field name="package_id"/>
                             <field name="package_type"/>
                             <field name="sale_date"/>
                             <field name="expiry_date" readonly="1"/>
@@ -38,7 +39,7 @@
                             <field name="is_package" invisible="1"/>
                             <field name="hours_quantity"/>
                             <field name="unit_price"/>
-                            <field name="total_amount" readonly="1"/>
+                            <field name="total_amount"/>
                             <field name="state" readonly="1"/>
                         </group>
                     </group>
@@ -49,6 +50,17 @@
                         </group>
                         <group>
                             <field name="credited_hours" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Depozit Məlumatları" class="oe_inline">
+                        <group>
+                            <field name="customer_deposit_balance" readonly="1" style="font-weight: bold; color: #28a745;"/>
+                            <field name="deposit_used" style="font-weight: bold; color: #dc3545;"/>
+                            <field name="deposit_added" style="font-weight: bold; color: #007bff;"/>
+                        </group>
+                        <group>
+                            <field name="amount_to_pay" readonly="1" style="font-size: 14px; font-weight: bold; color: #ff9800;"/>
+                            <field name="amount_paid" style="font-size: 14px; font-weight: bold; color: #17a2b8;"/>
                         </group>
                     </group>
                     <group string="Qeydlər">
@@ -68,6 +80,7 @@
                 <field name="name"/>
                 <field name="partner_id"/>
                 <field name="customer_type"/>
+                <field name="package_id"/>
                 <field name="package_type"/>
                 <field name="payment_method"/>
                 <field name="hours_quantity"/>
@@ -97,6 +110,7 @@
                 <filter string="Tək Saat" name="single" domain="[('package_type','=','single')]"/>
                 <filter string="8 Giriş Paketi" name="package_8" domain="[('package_type','=','package_8')]"/>
                 <filter string="12 Giriş Paketi" name="package_12" domain="[('package_type','=','package_12')]"/>
+                <filter string="Aylıq Paket Satışı" name="monthly_package" domain="[('package_id.package_type', '=', 'monthly')]"/>
                 <group expand="0" string="Qrupla">
                     <filter name="group_by_partner" string="Müştəri" context="{'group_by': 'partner_id'}"/>
                     <filter name="group_by_customer_type" string="Müştəri Növü" context="{'group_by': 'customer_type'}"/>
@@ -136,6 +150,7 @@
                 <field name="hours_added"/>
                 <field name="hours_used"/>
                 <field name="balance_after"/>
+                <field name="balance_channel"/>
                 <field name="description"/>
             </list>
         </field>

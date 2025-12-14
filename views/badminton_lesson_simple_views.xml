@@ -19,12 +19,21 @@
                     <button name="action_unfreeze" string="Aktiv et" 
                             type="object" class="btn-info"
                             invisible="state != 'frozen'"/>
+                    <button name="action_cancel_request" string="Ləğv Tələbi" 
+                            type="object" class="btn-danger"
+                            invisible="state not in ['draft', 'active', 'frozen']"/>
+                    <button name="action_restore_previous_state" string="Təsdiq et"
+                        type="object" class="btn-secondary"
+                        invisible="previous_state == False"/>
                     <!--button name="action_complete" string="Tamamla" 
                             type="object" class="btn-secondary"
                             invisible="state != 'active'"/-->
                     <button name="action_cancel" string="Ləğv et" 
                             type="object" class="btn-danger"
                             invisible="state not in ['draft', 'active', 'frozen']"/>
+                    <button name="action_recompute_subscription_status" string="🔄 Statusu Yenilə" 
+                            type="object" class="btn-secondary"
+                            groups="base.group_system"/>
                     <field name="state" widget="statusbar" 
                            statusbar_visible="draft,active,frozen,completed"/>
                 </header>
@@ -37,16 +46,16 @@
                     <group>
                         <group>
                             <field name="partner_id" options="{'no_create': True}" 
-                                   domain="[('is_company', '=', False), ('branch', '=', 'genclik')]"/>
+                                   domain="[('is_company', '=', False), ('sport_type', 'in', ['badminton', 'both']), ('branch', '=', 'genclik')]"/>
                             <field name="package_id"/>
-                            <field name="group_id" options="{'no_create': True}"/>
+                            <field name="group_ids" widget="many2many_tags" options="{'no_create': True}"/>
                             <field name="original_price" invisible="original_price == 0"/>
                             <field name="lesson_fee"/>
                         </group>
                         <group>
                             <field name="start_date"/>
                             <field name="end_date"/>
-                            <field name="payment_date" help="Bu tarixdəki GÜN hər ay kassaya ödəniş yazılarkən istifadə olunacaq"/>
+                            <field name="payment_date" help="İlkin başlanğıc tarixi (informativ)"/>
                         </group>
                     </group>
                     
@@ -57,7 +66,9 @@
                         </group>
                         <group>
                             <field name="last_payment_date" readonly="1"/>
-                            <field name="total_attendances" readonly="1"/>
+                            <!--field name="total_attendances" readonly="1"/-->
+                            <field name="current_month_attendances" readonly="1"/>
+                            <field name="substitute_count" readonly="1"/>
                         </group>
                     </group>
                     
@@ -65,8 +76,8 @@
                         <page string="Ödənişlər" name="payments">
                             <field name="payment_ids">
                                 <list string="Ödənişlər" editable="bottom">
+                                    <field name="real_date"/>
                                     <field name="payment_date"/>
-                                    <field name="payment_month"/>
                                     <field name="payment_method_lesson"/>
                                     <field name="amount"/>
                                     <field name="cash_flow_id" readonly="1" optional="hide"/>
@@ -92,6 +103,17 @@
                                 </ul>
                             </div>
                         </page>
+                        <page string="Əvəzedici Dərslər">
+                            <field name="substitute_ids" context="{'default_lesson_id': id}">
+                                <list editable="bottom" string="Əvəzedici Dərslər" decoration-success="state=='used'" decoration-danger="state=='cancelled'">
+                                    <field name="substitute_date"/>
+                                    <field name="group_id"/>
+                                    <field name="schedule_id"/>
+                                    <field name="state"/>
+                                    <field name="note"/>
+                                </list>
+                            </field>
+                        </page>
                         <page string="Dərsə İştiraklar">
                             <field name="attendance_ids">
                                 <list string="İştiraklar" create="false">
@@ -103,7 +125,7 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="Dondurma Tarixçəsi">
+                        <!--page string="Abunəlik Dondurmaları">
                             <field name="freeze_ids">
                                 <list>
                                     <field name="name"/>
@@ -111,18 +133,13 @@
                                     <field name="freeze_end_date"/>
                                     <field name="freeze_days"/>
                                     <field name="state"/>
-                                    <field name="notes"/>
                                 </list>
                             </field>
-                            <group class="mt-3">
-                                <group>
-                                    <field name="total_freeze_days"/>
-                                </group>
-                                <group>
-                                    <field name="current_freeze_id" readonly="1"/>
-                                </group>
+                            <group>
+                                <field name="total_freeze_days" readonly="1"/>
+                                <field name="current_freeze_id" readonly="1"/>
                             </group>
-                        </page>
+                        </page-->
                         <page string="Qeydlər">
                             <field name="notes" nolabel="1"/>
                         </page>
@@ -137,21 +154,25 @@
         <field name="name">badminton.lesson.simple.genclik.list</field>
         <field name="model">badminton.lesson.simple.genclik</field>
         <field name="arch" type="xml">
-            <list string="Badminton Dərsləri" decoration-success="state=='active'" 
-                  decoration-warning="state=='frozen'" decoration-info="state=='completed'" decoration-muted="state=='cancelled'">
+            <list string="Badminton Dərsləri"
+                  class="genclikk-badminton-subscription-list"
+                  decoration-success="state=='active'" 
+                  decoration-danger="subscription_payment_status in ['warning', 'overdue']" 
+                  decoration-info="state=='completed'" decoration-muted="state=='cancelled'"
+                  decoration-warning="state=='cancel_requested'">
                 <field name="name"/>
                 <field name="partner_id"/>
-                <field name="group_id"/>
+                <field name="group_ids" widget="many2many_tags"/>
                 <field name="lesson_fee"/>
                 <field name="total_months"/>
                 <field name="total_payments"/>
+                <field name="last_payment_date"/>
                 <field name="start_date"/>
                 <field name="end_date"/>
-                <field name="last_payment_date"/>
-                <field name="total_attendances"/>
-                <field name="total_freeze_days"/>
-                <field name="current_freeze_id"/>
-                <field name="state"/>
+                <!--field name="total_attendances"/-->
+                <field name="current_month_attendances"/>
+                <field name="subscription_payment_status" invisible="1"/>
+                <field name="state" widget="badge" decoration-success="state=='active'" decoration-info="state=='frozen'" decoration-danger="state=='cancelled'" decoration-warning="state=='cancel_requested'"/>
             </list>
         </field>
     </record>
@@ -164,14 +185,18 @@
             <search string="Badminton Dərsləri">
                 <field name="name"/>
                 <field name="partner_id"/>
+                <field name="group_ids"/>
                 <filter string="Aktiv" name="active" domain="[('state','=','active')]"/>
                 <filter string="Dondurulmuş" name="frozen" domain="[('state','=','frozen')]"/>
                 <filter string="Tamamlanmış" name="completed" domain="[('state','=','completed')]"/>
+                <filter string="Ləğv Tələbi" name="cancel_requested" domain="[('state','=','cancel_requested')]"/>
                 <filter string="Ləğv Edilmiş" name="cancelled" domain="[('state','=','cancelled')]"/>
+                <filter string="Ödəniş Xəbərdarlığı" name="payment_warning" domain="[('subscription_payment_status','=','warning')]"/>
+                <filter string="Ödəniş Gecikməsi" name="payment_overdue" domain="[('subscription_payment_status','=','overdue')]"/>
                 <group expand="0" string="Qruplaşdırma">
                     <filter string="Müştəri" name="group_partner" context="{'group_by': 'partner_id'}"/>
                     <filter string="Vəziyyət" name="group_state" context="{'group_by': 'state'}"/>
-                    <filter string="Qrup" name="group_group" context="{'group_by': 'group_id'}"/>
+                    <filter string="Qrup" name="group_group" context="{'group_by': 'group_ids'}"/>
                 </group>
             </search>
         </field>
@@ -194,7 +219,16 @@
         </field>
     </record>
 
-    <!-- Menu Items -->
-
-
+    <!-- Server Action: Statusu Yenilə (Toplu) -->
+    <record id="action_server_recompute_subscription_status" model="ir.actions.server">
+        <field name="name">🔄 Ödəniş Statusunu Yenilə</field>
+        <field name="model_id" ref="model_badminton_lesson_simple_genclik"/>
+        <field name="binding_model_id" ref="model_badminton_lesson_simple_genclik"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+if records:
+    records.action_recompute_subscription_status()
+        </field>
+    </record>
 </odoo>

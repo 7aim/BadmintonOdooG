@@ -11,6 +11,7 @@
                         <group>
                             <field name="name"/>
                             <field name="package_type"/>
+                            <field name="is_gedis_package" invisible="package_type != 'monthly'"/>
                         </group>
                         <group>
                             <field name="discount_percent"/>
@@ -39,6 +40,7 @@
             <list string="Badminton Paketləri">
                 <field name="name"/>
                 <field name="package_type"/>
+                <field name="is_gedis_package"/>
                 <field name="discount_percent"/>
                 <field name="adult_price"/>
                 <field name="child_price"/>

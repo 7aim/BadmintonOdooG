@@ -18,10 +18,11 @@ class BadmintonSession(models.Model):
     start_time = fields.Datetime(string="Başlama Vaxtı", readonly=True)
     end_time = fields.Datetime(string="Bitmə Vaxtı", readonly=True)
     duration_hours = fields.Float(string="Müddət (saat)", default=1.0, required=True)
-
+    
     promo_type = fields.Selection([
         ('1fit', '1FIT'),
         ('push30', 'PUSH30'),
+        ('push30_plus', 'PUSH30+'),
         ('tripsome', 'Tripsome')
     ], string="Tətbiq")
 
@@ -45,6 +46,12 @@ class BadmintonSession(models.Model):
     time_expired = fields.Boolean(string="Vaxt Bitib", compute="_compute_time_expired", store=False)
     completion_time = fields.Datetime(string="Tamamlanma Vaxtı")
     recently_completed = fields.Boolean(string="Son Tamamlanan", compute="_compute_recently_completed", store=True)
+    session_package_id = fields.Many2one(
+        'badminton.monthly.balance.genclik',
+        string="Paket",
+        domain="[('partner_id', '=', partner_id), ('state', '=', 'active'), ('remaining_units', '>', 0)]",
+        help="Sessiya üçün istifadə ediləcək aylıq paket balansi"
+    )
     
     # Növbə sistemi
     queue_number = fields.Integer(string="Növbə", compute="_compute_queue_number", store=False, readonly=True)
@@ -87,7 +94,7 @@ class BadmintonSession(models.Model):
         """Zal kapasiteti - System Parameter-dən oxunur"""
         capacity = self.env['ir.config_parameter'].sudo().get_param(
             'volan_genclikk.badminton_court_capacity', 
-            default='6'
+            default='8'
         )
         return int(capacity)
     
@@ -140,6 +147,19 @@ class BadmintonSession(models.Model):
                 rec.warn10_sent = False
         return res
 
+    @api.onchange('partner_id')
+    def _onchange_partner_id(self):
+        if self.session_package_id and self.session_package_id.partner_id != self.partner_id:
+            self.session_package_id = False
+    
+    @api.onchange('promo_type')
+    def _onchange_promo_type(self):
+        """Push30+ seçilendə müddəti 2 saat et"""
+        if self.promo_type == 'push30_plus':
+            self.duration_hours = 2.0
+        elif self.promo_type in ['1fit', 'push30', 'tripsome']:
+            self.duration_hours = 1.0
+
     # ---------- helpers / flows ----------
     def _deduct_balance_on_start(self):
         """Sessiya başladıqda balansı azaldır - daxili helper metod"""
@@ -147,20 +167,13 @@ class BadmintonSession(models.Model):
         
         if not self.partner_id:
             raise ValidationError('Zəhmət olmasa müştəri seçin!')
-
+        
         # Əgər promo_type varsa, balans azaltma
         if self.promo_type:
             _logger.info(f"Sessiya {self.name} tətbiq ({self.promo_type}) ilə başladıldı - balans azaldılmadı")
             return
-            
-        customer_balance = self.partner_id.badminton_balance or 0.0
-        required_hours = float(self.duration_hours)
 
-        if customer_balance < required_hours:
-            raise ValidationError(
-                f'{self.partner_id.name} müştərisinin kifayət qədər balansı yoxdur! '
-                f'Mövcud balans: {customer_balance} saat, Tələb olunan: {required_hours} saat'
-            )
+        required_hours = float(self.duration_hours)
 
         active = self.search([
             ('partner_id', '=', self.partner_id.id),
@@ -170,18 +183,15 @@ class BadmintonSession(models.Model):
         if active:
             raise ValidationError(f'{self.partner_id.name} üçün artıq aktiv sessiya var!')
 
-        new_balance = customer_balance - required_hours
-        self.partner_id.badminton_balance = new_balance
-
-        self.env['badminton.balance.history.genclik'].create({
-            'partner_id': self.partner_id.id,
-            'session_id': self.id,
-            'hours_used': required_hours,
-            'balance_before': customer_balance,
-            'balance_after': new_balance,
-            'transaction_type': 'usage',
-            'description': f"Sessiya başladıldı: {self.name}"
-        })
+        if self.session_package_id:
+            self._consume_selected_package(required_hours, 'usage', f"Sessiya başladıldı: {self.name}")
+        else:
+            self.partner_id.consume_badminton_hours(
+                required_hours,
+                transaction_type='usage',
+                description=f"Sessiya başladıldı: {self.name}",
+                session=self
+            )
 
     def start_session_manual(self):
         """Düymə ilə manual sessiya başlatma"""
@@ -205,8 +215,6 @@ class BadmintonSession(models.Model):
             'warn10_sent': False,
         })
 
-        customer_balance = self.partner_id.badminton_balance
-        
         # Növbə nömrələrini yenilə (compute field olduğu üçün avtomatik olacaq)
         
         # Səhifəni reload et ki, dəyişikliklər dərhal görünsün
@@ -225,11 +233,14 @@ class BadmintonSession(models.Model):
             if not partner.exists():
                 return {'status': 'error', 'message': 'Müştəri tapılmadı!'}
 
-            customer_balance = partner.badminton_balance or 0.0
+            monthly_hours = partner.get_monthly_hours_available()
+            normal_balance = partner.badminton_balance or 0.0
+            total_balance = monthly_hours + normal_balance
             required_hours = 1.0
-            if customer_balance < required_hours:
+            if total_balance < required_hours:
                 return {'status': 'error',
-                        'message': f'{partner.name} müştərisinin kifayət qədər balansı yoxdur! Mövcud balans: {customer_balance} saat'}
+                        'message': (f'{partner.name} müştərisinin kifayət qədər balansı yoxdur! '
+                                    f'Aylıq: {monthly_hours} saat, Normal: {normal_balance} saat')}
 
             active = self.search([
                 ('partner_id', '=', partner_id),
@@ -239,9 +250,10 @@ class BadmintonSession(models.Model):
                 return {'status': 'error', 'message': f'{partner.name} üçün artıq aktiv sessiya var!'}
 
             # Gözləmədə statusunda sessiya yarat (balans azaltma!)
-            if customer_balance < required_hours:
+            if total_balance < required_hours:
                 return {'status': 'error',
-                        'message': f'{partner.name} müştərisinin kifayət qədər balansı yoxdur! Mövcud balans: {customer_balance} saat'}
+                        'message': (f'{partner.name} müştərisinin kifayət qədər balansı yoxdur! '
+                                    f'Aylıq: {monthly_hours} saat, Normal: {normal_balance} saat')}
 
             session = self.create({
                 'partner_id': partner_id,
@@ -259,32 +271,56 @@ class BadmintonSession(models.Model):
 
     def extend_session(self, additional_hours=1.0):
         for s in self.filtered(lambda r: r.state in ('active', 'extended')):
-            current_balance = s.partner_id.badminton_balance or 0.0
-            if current_balance < additional_hours:
-                raise ValidationError(
-                    f'{s.partner_id.name} müştərisinin kifayət qədər balansı yoxdur! '
-                    f'Mövcud balans: {current_balance} saat, Uzatmaq üçün tələb olunan: {additional_hours} saat'
+            if s.session_package_id:
+                s._consume_selected_package(
+                    additional_hours,
+                    'extension',
+                    f"Sessiya uzadıldı: {s.name} (+{additional_hours} saat)"
                 )
-
-            new_balance = current_balance - additional_hours
-            s.partner_id.badminton_balance = new_balance
-
-            self.env['badminton.balance.history.genclik'].create({
-                'partner_id': s.partner_id.id,
-                'session_id': s.id,
-                'hours_used': additional_hours,
-                'balance_before': current_balance,
-                'balance_after': new_balance,
-                'transaction_type': 'extension',
-                'description': f"Sessiya uzadıldı: {s.name} (+{additional_hours} saat)"
-            })
+            else:
+                s.partner_id.consume_badminton_hours(
+                    additional_hours,
+                    transaction_type='extension',
+                    description=f"Sessiya uzadıldı: {s.name} (+{additional_hours} saat)",
+                    session=s
+                )
 
             s.extended_time += additional_hours
             s.end_time = s.end_time + timedelta(hours=additional_hours)
             s.state = 'extended'
             s.notes = (f"Sessiya {additional_hours} saat uzadıldı. "
-                       f"Balans: {current_balance} → {new_balance} saat")
+                       f"Aylıq balans: {s.partner_id.get_monthly_hours_available()} saat | "
+                       f"Normal balans: {s.partner_id.badminton_balance}")
             s.warn10_sent = False
+
+    def _consume_selected_package(self, hours, transaction_type, description):
+        self.ensure_one()
+        line = self.session_package_id
+        if not line:
+            raise ValidationError('Zəhmət olmasa paket seçin və ya paket boş olduğunu silin.')
+        if line.partner_id.id != self.partner_id.id:
+            raise ValidationError('Seçilən paket bu müştəriyə məxsus deyil!')
+        if line.state != 'active' or line.remaining_units <= 0:
+            raise ValidationError('Seçilən paket aktiv deyil və ya balansı qalmayıb!')
+
+        available_hours = line.get_hours_available()
+        if available_hours < hours:
+            raise ValidationError(
+                f'Seçilən paketdə kifayət qədər balans yoxdur! Mövcud: {available_hours} saat, tələb olunan: {hours} saat'
+            )
+
+        units_used, before, after = line.consume_hours(hours)
+        self.env['badminton.balance.history.genclik'].create({
+            'partner_id': self.partner_id.id,
+            'session_id': self.id,
+            'hours_used': units_used,
+            'balance_before': before,
+            'balance_after': after,
+            'transaction_type': transaction_type,
+            'description': description,
+            'balance_channel': 'monthly',
+            'monthly_line_id': line.id,
+        })
 
     def action_extend_session_wizard(self):
         return {

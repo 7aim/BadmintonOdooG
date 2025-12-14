@@ -9,6 +9,7 @@ class BadmintonSessionExtendWizard(models.TransientModel):
     session_id = fields.Many2one('badminton.session.genclik', string="Sessiya", required=True)
     partner_id = fields.Many2one(related='session_id.partner_id', string="Müştəri", readonly=True)
     current_balance = fields.Integer(related='partner_id.badminton_balance', string="Mövcud Balans", readonly=True)
+    monthly_balance_hours = fields.Float(related='partner_id.monthly_balance_hours', string="Aylıq Balans (saat)", readonly=True)
     extend_hours = fields.Float(string="Uzatma Saatı", default=1.0, required=True)
 
     def extend_session(self):

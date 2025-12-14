@@ -18,6 +18,13 @@ class VolanPartner(models.Model):
         ('yasamal', 'Yasamal')
     ], string="Filial", required=True)
     
+    # 2.1. İdman Növü Sahəsi
+    sport_type = fields.Selection([
+        ('badminton', 'Badminton'),
+        ('basketball', 'Basketbol'),
+        ('both', 'Hər İkisi')
+    ], string="İdman Növü", default='badminton', help="Müştərinin hansı idman növü ilə məşğul olduğunu göstərir")
+    
     # 3. Müştəri Mənbəyi
     customer_source = fields.Selection([
         ('instagram', 'Instagram'),
@@ -36,6 +43,12 @@ class VolanPartner(models.Model):
     # 4. Badminton Balans Sahəsi
     badminton_balance = fields.Integer(string="Badminton Balansı (saat)", default=0, 
                                       help="Müştərinin qalan badminton saatlarının sayı")
+    
+    # 4.1. Depozit və Aylıq Balans (Yasamal uyğunluğu üçün - Gənclikdə istifadə olunmur)
+    badminton_deposit_balance = fields.Float(string="Depozit Balansı", default=0.0,
+                                            help="Müştərinin depozit hesabındakı qalıq məbləğ (AZN)")
+    monthly_balance_hours = fields.Float(string="Aylıq Balans (saat)", default=0.0,
+                                          help="Müştərinin cari ay üçün istifadə edə biləcəyi saat sayı")
     
     # 5. Badminton Satış Tarixçəsi
     badminton_sale_ids = fields.One2many(

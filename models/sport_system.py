@@ -116,7 +116,7 @@ class SportMembership(models.Model):
     def _compute_remaining_lessons(self):
         for membership in self:
             membership.remaining_lessons = membership.total_lessons - membership.attended_lessons
-
+            
     @api.depends('branch_id')
     def _compute_monthly_fee(self):
         for membership in self:

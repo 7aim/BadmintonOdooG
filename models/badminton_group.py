@@ -2,13 +2,13 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 
+
 class BadmintonGroup(models.Model):
     _name = 'badminton.group.genclik'
     _description = 'Badminton Qrupu'
-    _order = 'name DESC, code_number'
+    _order = 'sequence, name DESC'
     
-    code = fields.Char(string="Qrup Kodu", readonly=True, default="Yeni")
-    code_number = fields.Integer(string="Kod Nömrəsi", compute="_compute_code_number", store=True, help="Q-1 → 1, Q-10 → 10")
+    sequence = fields.Integer(string="Sıra", default=10)
     name = fields.Char(string="Qrup Adı", required=True)
     description = fields.Text(string="Təsvir")
     
@@ -16,39 +16,25 @@ class BadmintonGroup(models.Model):
     schedule_ids = fields.One2many('badminton.group.schedule.genclik', 'group_id', string="Qrup Qrafiki")
     
     # Qrup üzvləri
-    member_ids = fields.One2many('badminton.lesson.simple.genclik', 'group_id', string="Qrup Üzvləri")
+    member_ids = fields.Many2many('badminton.lesson.simple.genclik', 'badminton_lesson_group_rel', 'group_id', 'lesson_id', string="Qrup Üzvləri", compute='_compute_member_ids')
     member_count = fields.Integer(string="Üzv Sayı", compute='_compute_member_count')
     unique_new_members_count = fields.Integer(string="Yeni Unikal Üzv", compute='_compute_unique_new_members', store=False)
-    
+
     # Aktivlik
     is_active = fields.Boolean(string="Aktiv", default=True)
     
     # Qeydlər
     notes = fields.Text(string="Qeydlər")
-
-    @api.depends('code')
-    def _compute_code_number(self):
-        """Qrup kodundan rəqəmi çıxarır (Q-1 → 1, Q-10 → 10)"""
+    
+    def _compute_member_ids(self):
+        """Bu qrupa aid olan aktiv abunəlikləri tap"""
         for group in self:
-            if group.code and group.code.startswith('Q-'):
-                try:
-                    group.code_number = int(group.code.split('-')[1])
-                except (ValueError, IndexError):
-                    group.code_number = 0
-            else:
-                group.code_number = 0
-
-    @api.model
-    def create(self, vals):
-        # Qrup kodu: Q-1, Q-2, Q-3... formatında (sıralama ilə)
-        # Mövcud qrupların sayını tap və 1 əlavə et
-        group_count = self.search_count([])
-        next_number = group_count + 1
-        
-        vals['code'] = f"Q-{next_number}"
-        
-        return super(BadmintonGroup, self).create(vals)
-
+            lessons = self.env['badminton.lesson.simple.genclik'].search([
+                ('group_ids', 'in', group.id),
+                ('state', '!=', 'cancelled')
+            ])
+            group.member_ids = [(6, 0, lessons.ids)]
+    
     @api.depends('member_ids', 'member_ids.state', 'member_ids.partner_id')
     def _compute_member_count(self):
         for group in self:
@@ -58,7 +44,7 @@ class BadmintonGroup(models.Model):
     
     def _compute_unique_new_members(self):
         """Hər qrupda yalnız yeni (əvvəlki qruplarda olmayan) müştəriləri say"""
-        all_groups = self.search([('is_active', '=', True)], order='name DESC, code_number')
+        all_groups = self.search([('is_active', '=', True)], order='sequence, name DESC')
         seen_partners = set()
         
         for group in all_groups:
@@ -75,14 +61,18 @@ class BadmintonGroup(models.Model):
             else:
                 active_members = group.member_ids.filtered(lambda l: l.state in ['active', 'frozen'])
                 seen_partners.update(active_members.mapped('partner_id').ids)
+    
+    @api.model
+    def create(self, vals):
+        return super(BadmintonGroup, self).create(vals)
 
 
 class BadmintonGroupSchedule(models.Model):
     _name = 'badminton.group.schedule.genclik'
     _description = 'Badminton Qrup Qrafiki'
     _order = 'day_of_week, start_time'
-    
-    group_id = fields.Many2one('badminton.group.genclik', string="Qrup", required=True, ondelete='cascade')
+
+    group_id = fields.Many2one('badminton.group', string="Qrup", required=True, ondelete='cascade')
     
     # Həftənin günü
     day_of_week = fields.Selection([
@@ -138,9 +128,9 @@ class BadmintonGroupSchedule(models.Model):
         """Qrup üzvlərinin qrafikini sinxronlaşdır"""
         self.ensure_one()
         
-        # Bu qrupun bütün aktiv üzvlərini tap
+        # Bu qrupun bütün aktiv üzvlərini tap (Many2many əlaqə)
         members = self.env['badminton.lesson.simple.genclik'].search([
-            ('group_id', '=', self.group_id.id),
+            ('group_ids', 'in', self.group_id.id),
             ('state', 'in', ['active', 'frozen'])
         ])
         
@@ -179,17 +169,3 @@ class BadmintonGroupSchedule(models.Model):
                         'is_active': self.is_active,
                         'notes': f"Qrup qrafiki: {self.group_id.name} (avtomatik əlavə edildi)"
                     })
-            
-    def name_get(self):
-        """Dərs vaxtını daha anlaşıqlı formada göstər"""
-        result = []
-        day_names = dict(self._fields['day_of_week'].selection)
-        for schedule in self:
-            start_hours = int(schedule.start_time)
-            start_minutes = int((schedule.start_time - start_hours) * 60)
-            end_hours = int(schedule.end_time)
-            end_minutes = int((schedule.end_time - end_hours) * 60)
-            
-            formatted_time = f"{day_names[schedule.day_of_week]} {start_hours:02d}:{start_minutes:02d}-{end_hours:02d}:{end_minutes:02d}"
-            result.append((schedule.id, formatted_time))
-        return result
