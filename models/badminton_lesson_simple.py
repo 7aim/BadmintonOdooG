@@ -76,7 +76,7 @@ class BadmintonLessonSimple(models.Model):
     # Abunəlik ödəniş statusu (rəng üçün)
     subscription_payment_status = fields.Selection([
         ('on_time', 'Vaxtında'),
-        ('warning', 'Xəbərdarlıq (25+ gün)'),
+        ('warning', 'Xəbərdarlıq'),
         ('overdue', 'Vaxtından keçmiş'),
     ], string="Abunəlik Ödəniş Statusu", compute='_compute_subscription_payment_status', store=True)
     
@@ -419,6 +419,19 @@ class BadmintonLessonSimple(models.Model):
                     'notes': 'Abunəlik yeniləməsi'
                 })
     
+    def action_return_cancelled(self):
+        """Ləğv edilmiş abunəliyi geri qaytar (yalnız cancelled üçün)"""
+        for lesson in self:
+            if lesson.state != 'cancelled':
+                continue
+
+            # Əgər 0 AZN-dirsə, qaytaranda da 'free' olsun
+            target_state = 'free' if lesson._is_zero_fee(lesson.lesson_fee) else 'active'
+
+            # write() içindəki məntiq işləsin (active olarsa ödəniş yoxdursa avtomatik ilk ödəniş yaratsın)
+            lesson.write({'state': target_state})
+
+
     def action_complete(self):
         for lesson in self:
             if lesson.state == 'active':
