@@ -99,7 +99,7 @@ class QRScannerWizard(models.TransientModel):
             active_lesson = self.env['badminton.lesson.simple.genclik'].search([
                 ('partner_id', '=', partner.id),
                 ('state', '=', 'active'),
-                ('start_date', '<=', fields.Date.today()),
+                ('payment_date', '<=', fields.Date.today()),
                 ('end_date', '>=', fields.Date.today())
             ], limit=1)
             

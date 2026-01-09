@@ -67,7 +67,7 @@ class BadmintonSaleWizard(models.TransientModel):
     # Qiymət məlumatları
     original_price = fields.Float(string="Endirimsiz Qiymət", readonly=True)
     discount_percent = fields.Float(string="Endirim (%)", readonly=True)
-    total_amount = fields.Float(string="Ümumi Məbləğ", store=True)
+    total_amount = fields.Float(string="Ümumi Məbləğ", readonly=True, store=True)
     
     # Ödəniş məlumatları
     payment_method = fields.Selection([
@@ -176,6 +176,21 @@ class BadmintonSaleWizard(models.TransientModel):
     
     def action_create_sale(self):
         """Satış yaradır və dərhal balansı artırır"""
+        # Ümumi məbləği yenidən hesabla (onchange-ə güvənmə)
+        if self.package_id:
+            if self.customer_type == 'child':
+                original_price = self.package_id.child_price
+            else:
+                original_price = self.package_id.adult_price
+            discount_percent = self.package_id.discount_percent
+            if discount_percent > 0:
+                discount_amount = original_price * (discount_percent / 100)
+                self.total_amount = original_price - discount_amount
+            else:
+                self.total_amount = original_price
+        else:
+            self._calculate_total()
+        
         if self.total_amount <= 0:
             raise ValidationError("Ümumi məbləğ 0-dan böyük olmalıdır!")
         if not self.partner_id:

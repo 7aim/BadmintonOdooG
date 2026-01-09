@@ -72,7 +72,7 @@ class BadmintonGroupSchedule(models.Model):
     _description = 'Badminton Qrup Qrafiki'
     _order = 'day_of_week, start_time'
 
-    group_id = fields.Many2one('badminton.group', string="Qrup", required=True, ondelete='cascade')
+    group_id = fields.Many2one('badminton.group.genclik', string="Qrup", required=True, ondelete='cascade')
     
     # Həftənin günü
     day_of_week = fields.Selection([

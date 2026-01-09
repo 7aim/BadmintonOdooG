@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
 from datetime import datetime, timedelta
+import base64
+import os
 
 class BadmintonLessonPayment(models.Model):
     _name = 'badminton.lesson.payment.genclik'
@@ -30,6 +32,10 @@ class BadmintonLessonPayment(models.Model):
     # Qeydlər
     notes = fields.Text(string="Qeydlər")
     
+    # Çap sayı (tracking üçün)
+    print_count = fields.Integer(string="Çap Sayı", default=0, readonly=True)
+    last_print_date = fields.Datetime(string="Son Çap Tarixi", readonly=True)
+
     @api.depends('lesson_id', 'lesson_id.lesson_fee')
     def _compute_default_amount(self):
         """Default məbləğ olaraq lesson_fee götür"""
@@ -50,7 +56,7 @@ class BadmintonLessonPayment(models.Model):
             if lesson and 'amount' in fields_list:
                 res['amount'] = lesson.lesson_fee
             if lesson and 'real_date' in fields_list and not res.get('real_date'):
-                res['real_date'] = lesson.start_date or lesson.payment_date or fields.Date.today()
+                res['real_date'] = lesson.payment_date or fields.Date.today()
                 
         return res
     
@@ -59,7 +65,7 @@ class BadmintonLessonPayment(models.Model):
         """Ödəniş yaradılanda kassaya əlavə et"""
         lesson = self.env['badminton.lesson.simple.genclik'].browse(vals['lesson_id']) if vals.get('lesson_id') else False
         if lesson:
-            default_due_date = lesson.start_date or lesson.payment_date or fields.Date.today()
+            default_due_date = lesson.payment_date or fields.Date.today()
             vals.setdefault('real_date', default_due_date)
 
         payment = super(BadmintonLessonPayment, self).create(vals)
@@ -123,3 +129,84 @@ class BadmintonLessonPayment(models.Model):
             name = f"{real_date} - {payment.amount} AZN (Ödənilən: {paid_date})"
             result.append((payment.id, name))
         return result
+
+
+    def action_print_receipt(self):
+        """Ödəniş çekini birbaşa çap et"""
+        self.ensure_one()
+        
+        # Çap sayını artır
+        self.sudo().write({
+            'print_count': self.print_count + 1,
+            'last_print_date': fields.Datetime.now()
+        })
+        
+        # Report-u birbaşa qaytır
+        return {
+            'type': 'ir.actions.report',
+            'report_name': 'volan_genclikk.report_badminton_payment_receipt_document',
+            'report_type': 'qweb-pdf',
+        }
+    
+    def get_badminton_logo(self):
+        """Badminton logo-nu base64 formatında qaytarır"""
+        try:
+            # Modul yolunu tap
+            module_path = os.path.dirname(os.path.dirname(__file__))
+            logo_path = os.path.join(module_path, 'static', 'description', 'icon.png')
+            
+            # Faylı oxu və base64-ə çevir
+            with open(logo_path, 'rb') as img_file:
+                return base64.b64encode(img_file.read())
+        except Exception:
+            return False
+
+    def get_amount_in_words(self):
+        """Məbləği yazı ilə qaytarır"""
+        self.ensure_one()
+        amount = int(self.amount)
+        
+        ones = ['', 'bir', 'iki', 'üç', 'dörd', 'beş', 'altı', 'yeddi', 'səkkiz', 'doqquz']
+        tens = ['', 'on', 'iyirmi', 'otuz', 'qırx', 'əlli', 'altmış', 'yetmiş', 'səksən', 'doxsan']
+        hundreds = ['', 'yüz', 'iki yüz', 'üç yüz', 'dörd yüz', 'beş yüz', 'altı yüz', 'yeddi yüz', 'səkkiz yüz', 'doqquz yüz']
+        
+        if amount == 0:
+            return 'sıfır manat'
+        
+        result = []
+        
+        # Yüzlük
+        if amount >= 100:
+            result.append(hundreds[amount // 100])
+            amount %= 100
+        
+        # Onluq
+        if amount >= 10:
+            result.append(tens[amount // 10])
+            amount %= 10
+        
+        # Birlik
+        if amount > 0:
+            result.append(ones[amount])
+        
+        return ' '.join(result) + ' manat'
+    
+    def get_receipt_number(self):
+        """Qəbz nömrəsini qaytarır - ödəniş ID əsasında"""
+        self.ensure_one()
+        return f"Y{str(self.id).zfill(5)}"
+    
+    def get_service_description(self):
+        """Xidmət təsvirini qaytarır"""
+        self.ensure_one()
+        # Ay adlarını Azərbaycan dilində
+        months_az = {
+            '01': 'Yanvar', '02': 'Fevral', '03': 'Mart', '04': 'Aprel',
+            '05': 'May', '06': 'Iyun', '07': 'Iyul', '08': 'Avqust',
+            '09': 'Sentyabr', '10': 'Oktyabr', '11': 'Noyabr', '12': 'Dekabr'
+        }
+        
+        month_num = self.payment_date.strftime('%m')
+        month_name = months_az.get(month_num, '')
+        
+        return f"{month_name} ayı üçün badminton məşqləri"

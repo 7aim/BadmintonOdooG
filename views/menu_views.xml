@@ -8,32 +8,32 @@
 
     <menuitem id="menu_badminton_sessions" name="Sessiyalar" parent="menu_badminton_section" sequence="15" 
               groups="volan_genclikk.group_genclik_nezaretci"/>
-    <menuitem id="menu_active_sessions" name="Aktiv Sessiyalar" parent="menu_badminton_sessions" 
+    <menuitem id="menu_active_sessions" name="⚡Aktiv Sessiyalar" parent="menu_badminton_sessions" 
               action="action_active_sessions" sequence="1"/>
-    <menuitem id="menu_all_sessions" name="Sessiyalar" parent="menu_badminton_sessions" 
+    <menuitem id="menu_all_sessions" name="📋 Sessiyalar" parent="menu_badminton_sessions" 
               action="action_badminton_session_genclik" sequence="2"/>
-    <menuitem id="menu_session_filter" name="Tarixə görə sessiyalar" parent="menu_badminton_sessions" 
+    <menuitem id="menu_session_filter" name="📅 Tarixə görə sessiyalar" parent="menu_badminton_sessions" 
               action="action_badminton_session_filter_genclik" sequence="3"/>
 
     <menuitem id="menu_badminton_sales" name="Satış" parent="menu_badminton_section" sequence="20" 
               groups="volan_genclikk.group_genclik_satici"/>
-    <menuitem id="menu_badminton_sale_wizard" name="Badminton Satışı" parent="menu_badminton_sales" 
+    <menuitem id="menu_badminton_sale_wizard" name="🏸 Badminton Satışı" parent="menu_badminton_sales" 
               action="action_badminton_sale_wizard_genclik" sequence="4"/>
-    <menuitem id="menu_badminton_sales_history" name="Satış Tarixçəsi" parent="menu_badminton_sales" 
+    <menuitem id="menu_badminton_sales_history" name="📈 Satış Tarixçəsi" parent="menu_badminton_sales" 
               action="action_badminton_sale_genclik" sequence="3"/>
-    <menuitem id="menu_badminton_balance_history" name="Balans Tarixçəsi" parent="menu_badminton_sales" 
+    <menuitem id="menu_badminton_balance_history" name="💵 Balans Tarixçəsi" parent="menu_badminton_sales" 
               action="action_badminton_balance_history" sequence="5"/>
 
     <menuitem id="menu_badminton_lessons" name="Badminton Dərsləri" parent="menu_badminton_section" sequence="25"
               groups="volan_genclikk.group_genclik_satici,volan_genclikk.group_genclik_mesqci"/>
-    <menuitem id="menu_badminton_lessons_simple" name="Abunəliklər" parent="menu_badminton_lessons" 
+    <menuitem id="menu_badminton_lessons_simple" name="💳 Abunəliklər" parent="menu_badminton_lessons" 
               action="action_badminton_lesson_simple_genclik" sequence="1" groups="volan_genclikk.group_genclik_satici"/>
-    <menuitem id="menu_badminton_groups" name="Badminton Qrupları" parent="menu_badminton_lessons" 
+    <menuitem id="menu_badminton_groups" name="🤾‍♂️ Badminton Qrupları" parent="menu_badminton_lessons" 
               action="action_badminton_group_genclik" sequence="2" groups="volan_genclikk.group_genclik_satici,volan_genclikk.group_genclik_mesqci"/>
-    <menuitem id="menu_badminton_lesson_freeze" name="Dondurma Tarixçəsi" parent="menu_badminton_lessons" 
+    <menuitem id="menu_badminton_lesson_freeze" name="❄️ Dondurma Tarixçəsi" parent="menu_badminton_lessons" 
               action="action_badminton_lesson_freeze_genclik" sequence="3" groups="volan_genclikk.group_genclik_satici"/>
-    <menuitem id="menu_badminton_attendance_check_list" name="İştirak Yoxlaması" parent="menu_badminton_lessons" 
-              action="action_badminton_attendance_check_genclik" sequence="4" groups="volan_genclikk.group_genclik_mesqci"/>
+    <!--menuitem id="menu_badminton_attendance_check_list" name="İştirak Yoxlaması" parent="menu_badminton_lessons" 
+              action="action_badminton_attendance_check_genclik" sequence="4" groups="volan_genclikk.group_genclik_mesqci"/-->
 
     <!-- Badminton Müştəriləri -->
     <record id="action_badminton_customers_genclik" model="ir.actions.act_window">
@@ -52,12 +52,13 @@
         </field>
     </record>
 
-    <menuitem id="menu_badminton_customers" name="🤵‍♂️ Badminton Müştəriləri" parent="menu_sport_main" 
+    <menuitem id="menu_badminton_customers" name="🤾‍♂️ Badminton Müştəriləri" parent="menu_sport_main" 
               action="action_badminton_customers_genclik" sequence="31" groups="volan_genclikk.group_genclik_satici,volan_genclikk.group_genclik_nezaretci,volan_genclikk.group_genclik_admin"/>
 
 
     <menuitem id="menu_qr_section" name="🔍 QR Scan" parent="menu_sport_main" 
-              action="action_qr_scanner_wizard_genclik" sequence="30" groups="volan_genclikk.group_genclik_nezaretci"/>
+              action="action_qr_scanner_wizard_genclik" sequence="32" groups="volan_genclikk.group_genclik_nezaretci"/>
+
 
     <!-- Müştərilər menyusunda domain əlavə et -->
     <record id="action_customers_genclik" model="ir.actions.act_window">
@@ -80,7 +81,7 @@
             action="action_customers_genclik" sequence="32" groups="volan_genclikk.group_genclik_satici,volan_genclikk.group_genclik_nezaretci,volan_genclikk.group_genclik_admin"/-->
 
     <menuitem id="menu_employees" name="🧑‍🔧 İşçilər" parent="menu_sport_main" 
-              action="hr.open_view_employee_list_my" sequence="33" groups="volan_genclikk.group_genclik_admin"/>
+              action="hr.open_view_employee_list_my" sequence="36" groups="volan_genclikk.group_genclik_admin"/>
     <menuitem id="menu_sport_config" name="⚙️ Tənzimləmələr" parent="menu_sport_main" sequence="40"
               groups="volan_genclikk.group_genclik_admin"/>
     <!--menuitem id="menu_customer_lookup" name="Müştəri Axtarışı" parent="menu_sport_config" 
@@ -104,7 +105,7 @@
     </record>
     <menuitem
         id="menu_badminton_package_genclik"
-        name="Paketlər"
+        name="📦 Paketlər"
         parent="menu_sport_config"
         action="action_badminton_package_genclik"
         sequence="1"/>

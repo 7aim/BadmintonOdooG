@@ -54,15 +54,17 @@
                             <field name="session_package_id" invisible="partner_id == False"/>
                             <field name="promo_type"/>
                             <field name="payment_type"/>
-                            <field name="duration_hours"/>
+                            <field name="duration_hours" readonly="state != 'draft'"/>
                             <field name="start_time" readonly="1"/>
                             <field name="end_time" readonly="1"/>
                             <field name="completion_time" readonly="1" invisible="[('state', '!=', 'completed')]"/>
                             <field name="qr_scanned" readonly="1"/>
+                            <field name="qr_link"/>
                         </group>
                         <group>
                             <field name="extended_time" readonly="1"/>
                             <field name="recently_completed" invisible="1"/>
+                            <field name="qr_image"/>
                         </group>
                     </group>
                     <notebook>
@@ -80,13 +82,14 @@
         <field name="name">badminton.session.genclik.list</field>
         <field name="model">badminton.session.genclik</field>
         <field name="arch" type="xml">
-            <list string="Badminton Sessiyaları"
+            <list string="Badminton Sessiyaları">
+                    <!--
                   decoration-success="state=='completed' and not recently_completed"
                   decoration-warning="state=='active' and not warn10_sent"
                   decoration-danger="warn10_sent"
                   decoration-info="state=='extended' and not warn10_sent"
                   decoration-primary="recently_completed">
-
+                    -->
                 <field name="name"/>
                 <field name="partner_id"/>
                 <field name="session_package_id"/>
@@ -99,6 +102,12 @@
                 <field name="state"/>
                 <field name="recently_completed" invisible="1"/>
                 <field name="warn10_sent" invisible="1"/>
+                <button name="start_session_manual" string="Başlat" type="object" icon="fa-play" 
+                        invisible="state != 'draft'" class="btn-success"/>
+                <button name="extend_session" string="Uzat" type="object" icon="fa-clock-o"
+                        invisible="state not in ['active', 'extended']"/>
+                <button name="complete_session" string="Tamamla" type="object" icon="fa-check"
+                        invisible="state not in ['active', 'extended']"/>
             </list>
         </field>
     </record>
@@ -109,7 +118,7 @@
         <field name="model">badminton.session.genclik</field>
         <field name="arch" type="xml">
             <list string="Aktiv Sessiyalar"
-                  class="genclikk-active-sessions-list"
+                  class="genclik-active-sessions-list"
                   decoration-muted="state=='draft'"
                   decoration-success="state=='active' and not time_expired and not warn10_sent"
                   decoration-info="state=='extended' and not time_expired and not warn10_sent"

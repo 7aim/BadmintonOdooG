@@ -30,7 +30,7 @@ class BadmintonSale(models.Model):
     # Satış məlumatları
     hours_quantity = fields.Integer(string="Saat Sayı", required=True, default=1)
     unit_price = fields.Float(string="Saatlıq Qiymət", default=8, store=True)
-    total_amount = fields.Float(string="Ümumi Məbləğ", store=True)
+    total_amount = fields.Float(string="Ümumi Məbləğ", readonly=True, store=True)
     
     # Depozit məlumatları (Gənclik filialında depozit sistemi aktiv deyil)
     customer_deposit_balance = fields.Float(string="Müştəri Depoziti", related='partner_id.badminton_deposit_balance', readonly=True)
@@ -287,4 +287,4 @@ class BadmintonBalanceHistory(models.Model):
         ('normal', 'Normal Balans'),
         ('monthly', 'Aylıq Paket')
     ], string="Balans Mənbəyi", default='normal')
-    monthly_line_id = fields.Many2one('badminton.monthly.balance', string="Aylıq Paket")
+    monthly_line_id = fields.Many2one('badminton.monthly.balance.genclik', string="Aylıq Paket")

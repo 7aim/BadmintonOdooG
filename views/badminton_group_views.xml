@@ -50,11 +50,12 @@
                                 <list string="Qrup Üzvləri" create="false">
                                     <field name="partner_id"/>
                                     <field name="state" decoration-info="state == 'frozen'" decoration-success="state == 'active'"/>
-                                    <field name="start_date"/>
-                                    <field name="end_date"/>
-                                    <field name="total_months"/>
-                                    <field name="total_attendances"/>
-                                    <field name="state"/>
+                                    <!--<field name="start_date"/>
+                                    <field name="end_date"/>-->
+                                    <field name="total_months" readonly="1"/>
+                                    <field name="lesson_fee" readonly="1"/>
+                                    <field name="total_payments" readonly="1"/>
+                                    <field name="current_month_attendances"/>
                                 </list>
                             </field>
                         </page>

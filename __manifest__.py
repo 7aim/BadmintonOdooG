@@ -10,7 +10,7 @@
     'images': [
         'static/description/icon.png',
     ],
-    'depends': ['base', 'contacts', 'mail'],
+    'depends': ['base', 'contacts', 'mail', 'hr', 'bus'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
@@ -26,12 +26,14 @@
         'views/badminton_lesson_freeze_views.xml',
         'views/badminton_lesson_simple_views.xml',
         'views/badminton_group_views.xml',
+        'views/badminton_lesson_payment_views.xml',
         'views/customer_wizard_views.xml',
         'views/qr_scanner_views.xml',
         'views/session_extend_wizard_views.xml',
         'views/badminton_attendance_check_views.xml',
         'views/menu_views.xml',
         'views/cash_views.xml',
+        'reports/badminton_payment_receipt.xml',
     ],
     'assets': {
         'web.assets_backend': [

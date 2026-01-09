@@ -74,7 +74,7 @@ class BadmintonLessonSubstitute(models.Model):
         """Əvəzedici dərsin tarixi dərs aktiv olduğu zaman olmalıdır"""
         for record in self:
             if record.lesson_id:
-                if record.substitute_date < record.lesson_id.start_date:
+                if record.substitute_date < record.lesson_id.payment_date:
                     raise ValidationError(
                         "Əvəzedici dərsin tarixi abunəlik başlama tarixindən əvvəl ola bilməz!"
                     )

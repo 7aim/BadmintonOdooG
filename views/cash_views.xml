@@ -147,27 +147,79 @@
                     <group>
                         <group string="🏸 Abunəlik Gəliri">
                             <group>
-                                <field name="subscription_cash_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
-                                <field name="subscription_card_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #2874a7ff;"/>
-                                <field name="subscription_total_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
-                                <field name="delayed_payments_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #ff6b6b;"/>
+                                <label for="subscription_cash_amount"/>
+                                <button name="action_view_subscription_cash" type="object" class="kassa_value_btn" title="Sənədləri aç">
+                                    <field name="subscription_cash_amount" widget="monetary" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                                </button>
+
+                                <label for="subscription_card_amount"/>
+                                <button name="action_view_subscription_card" type="object" class="kassa_value_btn" title="Sənədləri aç">
+                                    <field name="subscription_card_amount" widget="monetary" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #2874a7ff;"/>
+                                </button>
+
+                                <label for="subscription_total_amount"/>
+                                <button name="action_view_subscription_total" type="object" class="kassa_value_btn" title="Sənədləri aç">
+                                    <field name="subscription_total_amount" widget="monetary" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                                </button>
+
+                                <label for="delayed_payments_amount"/>
+                                <button name="action_view_delayed_payments" type="object" class="kassa_value_btn" title="Sənədləri aç">
+                                    <field name="delayed_payments_amount" widget="monetary" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #ff6b6b;"/>
+                                </button>
                             </group>
                         </group>
                         <group string="🏸 Badminton Satışı">
                             <group>
-                                <field name="badminton_sale_cash_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
-                                <field name="badminton_sale_card_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #2874a7ff;"/>
-                                <field name="badminton_sale_abonent_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #6c757d;"/>
-                                <field name="badminton_sale_total_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #17a2b8;"/>
+                                <label for="badminton_sale_cash_amount"/>
+                                <button name="action_view_badminton_sale_cash" type="object" class="kassa_value_btn" title="Satışları aç">
+                                    <field name="badminton_sale_cash_amount" widget="monetary" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                                </button>
+
+                                <label for="badminton_sale_card_amount"/>
+                                <button name="action_view_badminton_sale_card" type="object" class="kassa_value_btn" title="Satışları aç">
+                                    <field name="badminton_sale_card_amount" widget="monetary" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #2874a7ff;"/>
+                                </button>
+
+                                <label for="badminton_sale_abonent_amount"/>
+                                <button name="action_view_badminton_sale_abonent" type="object" class="kassa_value_btn" title="Satışları aç">
+                                    <field name="badminton_sale_abonent_amount" widget="monetary" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #6c757d;"/>
+                                </button>
+
+                                <label for="badminton_sale_total_amount"/>
+                                <button name="action_view_badminton_sale_total" type="object" class="kassa_value_btn" title="Satışları aç">
+                                    <field name="badminton_sale_total_amount" widget="monetary" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #17a2b8;"/>
+                                </button>
                             </group>
                         </group>
                     </group>
                     <group>
                         <group string="🏷️ Digər Mədaxil/Məxaric">
                             <group>
-                                <field name="other_income_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
-                                <field name="other_expense_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #a72828ff;"/>
-                                <field name="other_net_amount" widget="monetary" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                                <label for="other_income_amount"/>
+                                <button name="action_view_other_income" type="object" class="kassa_value_btn" title="Sənədləri aç">
+                                    <field name="other_income_amount" widget="monetary" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                                </button>
+
+                                <label for="other_expense_amount"/>
+                                <button name="action_view_other_expense" type="object" class="kassa_value_btn" title="Sənədləri aç">
+                                    <field name="other_expense_amount" widget="monetary" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #a72828ff;"/>
+                                </button>
+
+                                <label for="other_net_amount"/>
+                                <button name="action_view_other_net" type="object" class="kassa_value_btn" title="Sənədləri aç">
+                                    <field name="other_net_amount" widget="monetary" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                                </button>
                             </group>
                         </group>
                         <group string="🧾 Ümumi Nəticə">
@@ -189,31 +241,69 @@
                         </group>
                         <group string="📊 Giriş Hesabatı">
                             <group>
-                                <field name="cash_entries" string="💵 Nağd" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
-                                <field name="card_entries" string="💳 Card to card" style="font-size: 18px; font-weight: bold; color: #007bff;"/>
-                                <field name="abonent_entries" string="🎫 Abunəçi" style="font-size: 18px; font-weight: bold; color: #6c757d;"/>
+                                <label for="cash_entries"/>
+                                <button name="action_view_entries_cash" type="object" class="kassa_value_btn" title="Sessiyaları aç">
+                                    <field name="cash_entries" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #28a745;"/>
+                                </button>
+
+                                <label for="card_entries"/>
+                                <button name="action_view_entries_card" type="object" class="kassa_value_btn" title="Sessiyaları aç">
+                                    <field name="card_entries" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #007bff;"/>
+                                </button>
+
+                                <label for="abonent_entries"/>
+                                <button name="action_view_entries_abonent" type="object" class="kassa_value_btn" title="Sessiyaları aç">
+                                    <field name="abonent_entries" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #6c757d;"/>
+                                </button>
                             </group>
                         </group>
                         <group string="📊 Tətbiq Hesabatı">
                             <group>
-                                <field name="onefit_entries" string="🏃 1fit" style="font-size: 18px; font-weight: bold; color: #ffc107;"/>
-                                <field name="push30_entries" string="⚡ Push30" style="font-size: 18px; font-weight: bold; color: #ffc107;"/>
-                                <field name="push30_plus_entries" string="⚡ Push30+" style="font-size: 18px; font-weight: bold; color: #ffc107;"/>
-                                <field name="tripsome_entries" string="🚗 Tripsome" style="font-size: 18px; font-weight: bold; color: #ffc107;"/>
-                                <field name="total_entries" string="📈 Ümumi giriş sayı" style="font-size: 20px; font-weight: bold; color: #17a2b8;"/>
+                                <label for="onefit_entries"/>
+                                <button name="action_view_app_onefit" type="object" class="kassa_value_btn" title="Sessiyaları aç">
+                                    <field name="onefit_entries" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #ffc107;"/>
+                                </button>
+
+                                <label for="push30_entries"/>
+                                <button name="action_view_app_push30" type="object" class="kassa_value_btn" title="Sessiyaları aç">
+                                    <field name="push30_entries" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #ffc107;"/>
+                                </button>
+
+                                <label for="push30_plus_entries"/>
+                                <button name="action_view_app_push30_plus" type="object" class="kassa_value_btn" title="Sessiyaları aç">
+                                    <field name="push30_plus_entries" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #ffc107;"/>
+                                </button>
+
+                                <label for="tripsome_entries"/>
+                                <button name="action_view_app_tripsome" type="object" class="kassa_value_btn" title="Sessiyaları aç">
+                                    <field name="tripsome_entries" nolabel="1"
+                                        style="font-size: 18px; font-weight: bold; color: #ffc107;"/>
+                                </button>
+
+                                <label for="total_entries"/>
+                                <button name="action_view_entries_total" type="object" class="kassa_value_btn" title="Bütün sessiyaları aç">
+                                    <field name="total_entries" nolabel="1"
+                                        style="font-size: 20px; font-weight: bold; color: #17a2b8;"/>
+                                </button>
                             </group>
                         </group>
-                        <group string="⛹️‍♂️ Uşaq Sayı">
+                        <group string="🏸 Müştəri Sayı">
                             <group>
                                 <field name="total_children_count" style="font-size: 18px; font-weight: bold; color: #28a745;"/>
                             </group>
                         </group>
-                        <group string="🆕 Yeni Uşaqlar">
+                        <group string="🆕 Yeni Müştərilər">
                             <group>
                                 <field name="new_children_count" style="font-size: 18px; font-weight: bold; color: #2874a7ff;"/>
                             </group>
                         </group>
-                    </group>   
+                    </group> 
                 </sheet>
                 <footer> <!-- Kassa Wizard Feature -->
                     <button string="Bağla" class="btn-secondary" special="cancel"/>
@@ -247,12 +337,18 @@
         </field>
     </record>
 
-    <menuitem id="menu_cash" name="💰 Kassa" parent="menu_sport_main" sequence="35"/>
+    <record id="action_badminton_cash_balance_genclik" model="ir.actions.act_window">
+        <field name="name">Badminton Kassa Hesabatı</field>
+        <field name="res_model">badminton.cash.balance.genclik</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'dialog_size': 'large'}</field>
+    </record>
 
-    <!-- Cash Submenu -->
-    <menuitem id="menu_cash_balance" name="Kassa Balansı" parent="menu_cash" 
-              action="action_volan_cash_balance_genclik" sequence="1"/>
-    <menuitem id="menu_cash_flow" name="Kassa Əməliyyatları" parent="menu_cash" 
+    <menuitem id="menu_cash" name="💰 Kassa" parent="menu_sport_main" sequence="35"/>
+    <menuitem id="menu_cash_balance" name="🧾 Kassa Balansı" parent="menu_cash" 
+              action="action_badminton_cash_balance_genclik" sequence="1"/>
+    <menuitem id="menu_cash_flow" name="💸 Kassa Əməliyyatları" parent="menu_cash" 
               action="action_volan_cash_flow_genclik" sequence="2"/>
 
 </odoo>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Çek Formatı -->
+    <record id="paperformat_receipt" model="report.paperformat">
+        <field name="name">Badminton Çeki</field>
+        <field name="default" eval="False"/>
+        <field name="format">custom</field>
+        <field name="page_height">180</field>
+        <field name="page_width">80</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">0.5</field>
+        <field name="margin_bottom">0.5</field>
+        <field name="margin_left">1</field>
+        <field name="margin_right">1</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <!-- Report -->
+    <record id="action_report_badminton_payment_receipt" model="ir.actions.report">
+        <field name="name">Badminton Ödəniş Çeki</field>
+        <field name="model">badminton.lesson.payment.genclik</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">volan_genclikk.report_badminton_payment_receipt_document</field>
+        <field name="report_file">volan_genclikk.report_badminton_payment_receipt_document</field>
+        <field name="paperformat_id" ref="paperformat_receipt"/>
+        <field name="print_report_name">'Çek-%s' % (object.lesson_id.partner_id.name)</field>
+    </record>
+
+    <!-- View düyməsi -->
+    <record id="view_badminton_lesson_simple_form_with_print" model="ir.ui.view">
+        <field name="name">badminton.lesson.simple.genclik.form.print</field>
+        <field name="model">badminton.lesson.simple.genclik</field>
+        <field name="inherit_id" ref="view_badminton_lesson_simple_genclik_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='payment_ids']/list/field[@name='notes']" position="after">
+                <button name="action_print_receipt" 
+                        string="Çap et" 
+                        type="object" 
+                        class="btn-sm btn-primary"
+                        icon="fa-print"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- MODERN ÇEK -->
+    <template id="report_badminton_payment_receipt_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <div class="page" style="font-family: 'DejaVu Sans', 'Helvetica', Arial, sans-serif;">
+                    <meta charset="UTF-8"/>
+                    <div style="width: 78mm; margin: 0 auto; padding: 2mm; font-size: 8.5pt; background: #ffffff;">
+                        
+                        <!-- HEADER - Ağ Arxafon -->
+                        <div style="text-align: center; padding: 3mm 2mm; background: #ffffff; border-bottom: 2px solid #e0e0e0; margin-bottom: 3mm;">
+                            <div t-if="o.get_badminton_logo()" style="margin-bottom: 1.5mm;">
+                                <img t-att-src="'data:image/png;base64,' + o.get_badminton_logo().decode('utf-8')" style="max-width: 32mm; height: auto;"/>
+                            </div>
+                            <div style="font-size: 13pt; font-weight: bold; letter-spacing: 0.5pt; margin-bottom: 0.5mm; color: #000000;">VOLAN BADMINTON</div>
+                            <div style="font-size: 7.5pt; color: #666666; text-transform: uppercase; letter-spacing: 0.8pt;">Ödəniş Çeki</div>
+                        </div>
+
+                        <!-- Abunəlik Badge -->
+                        <div style="text-align: center; margin: -1mm 0 3mm 0;">
+                            <span style="display: inline-block; background: #d0b55c; color: #ffffff; padding: 1.5mm 5mm; border-radius: 3mm; font-size: 9pt; font-weight: bold;">
+                                <t t-esc="o.lesson_id.name"/>
+                            </span>
+                        </div>
+
+                        <!-- Məlumatlar Card -->
+                        <div style="background: #ffffff; border-radius: 2mm; padding: 2.5mm; margin-bottom: 3mm; border: 1px solid #e0e0e0;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 1.3mm 0; color: #666666; font-size: 7.5pt; width: 40%;">Müştəri</td>
+                                    <td style="padding: 1.3mm 0; text-align: right; font-weight: bold; width: 60%; color: #000000; font-size: 8pt;">
+                                        <t t-esc="o.lesson_id.partner_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr style="border-top: 1px solid #f0f0f0;">
+                                    <td style="padding: 1.3mm 0; color: #666666; font-size: 7.5pt;">Ödəniş</td>
+                                    <td style="padding: 1.3mm 0; text-align: right; font-weight: bold; color: #000000; font-size: 8pt;">
+                                        <t t-esc="(o.real_date or o.payment_date).strftime('%d.%m.%Y')"/>
+                                    </td>
+                                </tr>
+                                <tr style="border-top: 1px solid #f0f0f0;">
+                                    <td style="padding: 1.3mm 0; color: #666666; font-size: 7.5pt;">Xidmət</td>
+                                    <td style="padding: 1.3mm 0; text-align: right; font-weight: bold; color: #000000; font-size: 8pt;">
+                                        <t t-esc="o.get_service_description()"/>
+                                    </td>
+                                </tr>
+                                <tr style="border-top: 1px solid #f0f0f0;">
+                                    <td style="padding: 1.3mm 0; color: #666666; font-size: 7.5pt;">Ödəniş Metodu</td>
+                                    <td style="padding: 1.3mm 0; text-align: right; font-weight: bold; color: #000000; font-size: 8pt;">
+                                        <t t-if="o.payment_method_lesson == 'cash'">Nağd</t>
+                                        <t t-elif="o.payment_method_lesson == 'card'">Kart</t>
+                                        <t t-elif="o.payment_method_lesson == 'bank'">Bank</t>
+                                        <t t-else="">Digər</t>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Məbləğ Box - Solid Color -->
+                        <div style="text-align: center; padding: 5mm; margin: 3mm 0; background: #d0b55c; color: #ffffff; border-radius: 2mm; border: 1px solid #d0b55c;">
+                            <div style="font-size: 22pt; font-weight: bold; letter-spacing: 1pt; color: #ffffff;">
+                                <t t-esc="'%.2f' % o.amount"/> AZN
+                            </div>
+                            <div style="font-size: 8pt; font-weight: 400; margin-top: 1.5mm; color: #ffffff;">
+                                ( <t t-esc="o.get_amount_in_words()"/> )
+                            </div>
+                        </div>
+
+                        <!-- Abunəlik Card -->
+                        <div style="background: #ffffff; border-radius: 2mm; padding: 2.5mm; margin-bottom: 3mm; border: 1px solid #e0e0e0;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 1.3mm 0; color: #666666; font-size: 7.5pt; width: 40%;">Abunəlik</td>
+                                    <td style="padding: 1.3mm 0; text-align: right; font-weight: bold; color: #000000; font-size: 8pt; width: 60%;">
+                                        <t t-esc="o.lesson_id.total_months"/> ay
+                                    </td>
+                                </tr>
+                                <tr style="border-top: 1px solid #f0f0f0;" t-if="o.lesson_id.end_date">
+                                    <td style="padding: 1.3mm 0; color: #666666; font-size: 7.5pt;">Bitmə</td>
+                                    <td style="padding: 1.3mm 0; text-align: right; font-weight: bold; color: #000000; font-size: 8pt;">
+                                        <t t-esc="o.lesson_id.end_date.strftime('%d.%m.%Y')"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- İmza -->
+                        <div style="margin-top: 5mm; padding-top: 1.5mm; border-top: 2px dashed #cccccc; width: 35mm; margin-left: auto; margin-right: auto; text-align: center;">
+                            <div style="font-size: 7pt; color: #999999; margin-bottom: 0.5mm;">Kassir</div>
+                            <div style="height: 4mm;"></div>
+                        </div>
+
+                        <!-- Thank You -->
+                        <div style="text-align: center; margin: 3mm 0;">
+                            <div style="font-size: 10pt; font-weight: bold; color: #d0b55c; margin-bottom: 1mm;">Təşəkkürlər!</div>
+                            <div style="font-size: 7pt; color: #666666; line-height: 1.4;">Sağlam həyat, güclü gələcək!</div>
+                        </div>
+
+                        <!-- Qəbz nömrəsi -->
+                        <div style="text-align: center; margin-top: 2mm; padding-top: 2mm; border-top: 1px solid #e0e0e0;">
+                            <div style="font-size: 7.5pt; color: #666666;">
+                                Qəbz No: <span style="font-weight: bold; color: #000000;"><t t-esc="o.get_receipt_number()"/></span>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style="text-align: center; font-size: 6pt; padding-top: 2mm; margin-top: 2mm; border-top: 1px solid #e0e0e0; color: #999999;">
+                            <div>Çap: <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d.%m.%Y %H:%M')"/></div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

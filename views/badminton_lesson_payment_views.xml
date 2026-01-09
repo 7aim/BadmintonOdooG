@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Badminton Ödənişləri Tree View -->
+    <record id="view_badminton_lesson_payment_tree" model="ir.ui.view">
+        <field name="name">badminton.lesson.payment.genclik.list</field>
+        <field name="model">badminton.lesson.payment.genclik</field>
+        <field name="arch" type="xml">
+            <list string="Badminton Abunəlik Ödənişləri" create="false" edit="false" delete="false">
+                <field name="lesson_id" string="Abunəlik"/>
+                <field name="partner_id" string="Müştəri"/>
+                <field name="real_date" string="Ödəniş Tarixi"/>
+                <field name="payment_date" string="Aid olduğu ay"/>
+                <field name="payment_method_lesson" string="Ödəniş Növü"/>
+                <field name="amount" string="Məbləğ" sum="Cəmi"/>
+                <field name="notes" string="Qeyd" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Badminton Ödənişləri Search View -->
+    <record id="view_badminton_lesson_payment_search" model="ir.ui.view">
+        <field name="name">badminton.lesson.payment.genclik.search</field>
+        <field name="model">badminton.lesson.payment.genclik</field>
+        <field name="arch" type="xml">
+            <search string="Ödəniş Axtar">
+                <field name="partner_id" string="Müştəri"/>
+                <field name="lesson_id" string="Abunəlik"/>
+                <field name="payment_date" string="Ödəniş Tarixi"/>
+                <field name="real_date" string="Real Tarix"/>
+                
+                <filter name="filter_cash" string="💵 Nağd" 
+                        domain="[('payment_method_lesson', '=', 'cash')]"/>
+                <filter name="filter_card" string="💳 Kart" 
+                        domain="[('payment_method_lesson', '=', 'card')]"/>
+                
+                <separator/>
+                <filter name="filter_this_month" string="Bu Ay (Real Tarix)" 
+                        domain="[('real_date', '&gt;=', (context_today() - relativedelta(day=1)).strftime('%Y-%m-%d')),
+                                 ('real_date', '&lt;=', (context_today() + relativedelta(day=31)).strftime('%Y-%m-%d'))]"/>
+                <filter name="filter_last_month" string="Keçən Ay (Real Tarix)" 
+                        domain="[('real_date', '&gt;=', (context_today() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')),
+                                 ('real_date', '&lt;=', (context_today() - relativedelta(months=1, day=31)).strftime('%Y-%m-%d'))]"/>
+                
+                <separator/>
+                <filter name="filter_payment_this_month" string="Bu Ay (Ödəniş Tarixi)" 
+                        domain="[('payment_date', '&gt;=', (context_today() - relativedelta(day=1)).strftime('%Y-%m-%d')),
+                                 ('payment_date', '&lt;=', (context_today() + relativedelta(day=31)).strftime('%Y-%m-%d'))]"/>
+                <filter name="filter_payment_last_month" string="Keçən Ay (Ödəniş Tarixi)" 
+                        domain="[('payment_date', '&gt;=', (context_today() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')),
+                                 ('payment_date', '&lt;=', (context_today() - relativedelta(months=1, day=31)).strftime('%Y-%m-%d'))]"/>
+                
+                <group expand="0" string="Qruplaşdır">
+                    <filter name="group_by_partner" string="Müştəri" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_by_payment_method" string="Ödəniş Növü" context="{'group_by': 'payment_method_lesson'}"/>
+                    <filter name="group_by_real_date" string="Real Tarix (Ay)" context="{'group_by': 'real_date:month'}"/>
+                    <filter name="group_by_payment_date" string="Ödəniş Tarixi (Ay)" context="{'group_by': 'payment_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Badminton Ödənişləri Action -->
+    <record id="action_badminton_lesson_payment" model="ir.actions.act_window">
+        <field name="name">Abunəlik Ödənişləri</field>
+        <field name="res_model">badminton.lesson.payment.genclik</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_badminton_lesson_payment_search"/>
+        <field name="context">{'search_default_filter_this_month': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Badminton abunəlik ödənişləri
+            </p>
+            <p>
+                Burada bütün badminton abunəlik ödənişlərini görə bilərsiniz.
+            </p>
+        </field>
+    </record>
+</odoo>

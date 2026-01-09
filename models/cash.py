@@ -84,8 +84,8 @@ class BadmintonCashBalance(models.TransientModel):
     initial_balance = fields.Float('🧾 İlkin Qalıq', readonly=True,
                                    help='Kassa Balansı - seçilmiş tarix aralığındakı Ümumi Qalıq')
 
-    total_children_count = fields.Integer('👥 Ümumi Uşaq', readonly=True)
-    new_children_count = fields.Integer('🆕 Yeni Uşaq', readonly=True)
+    total_children_count = fields.Integer('👥 Ümumi Müştəri', readonly=True)
+    new_children_count = fields.Integer('🆕 Yeni Müştəri', readonly=True)
 
     delayed_payments_amount = fields.Float('⏰ Gecikmiş Ödənişlər', readonly=True,
                                           help="Real_date bu tarix aralığında olan amma payment_date başqa tarixdə olan ödənişlər")
@@ -385,13 +385,13 @@ class BadmintonCashBalance(models.TransientModel):
         new_children = 0
         if date_from and date_to:
             lessons_in_range = lesson_obj.search([
-                ('start_date', '>=', date_from),
-                ('start_date', '<=', date_to),
+                ('payment_date', '>=', date_from),
+                ('payment_date', '<=', date_to),
             ])
             range_partners = set(lessons_in_range.mapped('partner_id').ids)
             earlier_partners = set()
             if date_from:
-                earlier_lessons = lesson_obj.search([('start_date', '<', date_from)])
+                earlier_lessons = lesson_obj.search([('payment_date', '<', date_from)])
                 earlier_partners = set(earlier_lessons.mapped('partner_id').ids)
             new_children = len(range_partners - earlier_partners)
 
@@ -586,3 +586,144 @@ class BadmintonCashBalance(models.TransientModel):
             ('transaction_type', '=', 'expense')
         ]
         return self._open_badminton_cash_view('Badminton Xərcləri', domain)
+
+    # ---------------- Helpers ----------------
+    def _ensure_one_and_get_range(self):
+        self.ensure_one()
+        state = self._resolve_filter_state()
+        date_from, date_to = self._get_date_range(state)
+        return date_from, date_to
+
+    def _act_window(self, name, res_model, domain, context=None):
+        ctx = dict(self.env.context)
+        if context:
+            ctx.update(context)
+        return {
+            "type": "ir.actions.act_window",
+            "name": name,
+            "res_model": res_model,
+            "view_mode": "list,form",
+            "views": [(False, "list"), (False, "form")],
+            "target": "current",
+            "domain": domain,
+            "context": ctx,
+        }
+
+    # ---------------- 1) Abunəlik (badminton.lesson.payment) ----------------
+    def action_view_subscription_cash(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sets = self._get_subscription_payment_sets(date_from, date_to)
+        payments = sets["all_for_report"].filtered(lambda p: p.payment_method_lesson == "cash")
+        return self._act_window("Abunəlik Nağd Ödənişləri", "badminton.lesson.payment.genclik", [("id", "in", payments.ids)])
+
+    def action_view_subscription_card(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sets = self._get_subscription_payment_sets(date_from, date_to)
+        payments = sets["all_for_report"].filtered(lambda p: p.payment_method_lesson == "card")
+        return self._act_window("Abunəlik Kart Ödənişləri", "badminton.lesson.payment.genclik", [("id", "in", payments.ids)])
+
+    def action_view_subscription_total(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sets = self._get_subscription_payment_sets(date_from, date_to)
+        payments = sets["all_for_report"]
+        return self._act_window("Abunəlik Ödənişləri (Ümumi)", "badminton.lesson.payment.genclik", [("id", "in", payments.ids)])
+
+    def action_view_delayed_payments(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sets = self._get_subscription_payment_sets(date_from, date_to)
+        payments = sets["delayed"]
+        return self._act_window("Gecikmiş Ödənişlər", "badminton.lesson.payment.genclik", [("id", "in", payments.ids)])
+
+    # ---------------- 2) Badminton Satışı (badminton.sale) ----------------
+    def action_view_badminton_sale_cash(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sales = self.env["badminton.sale.genclik"].search(self._build_sale_domain(date_from, date_to) + [("payment_method", "=", "cash")])
+        return self._act_window("Badminton Satışı (Nağd)", "badminton.sale.genclik", [("id", "in", sales.ids)])
+
+    def action_view_badminton_sale_card(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sales = self.env["badminton.sale.genclik"].search(self._build_sale_domain(date_from, date_to) + [("payment_method", "=", "card")])
+        return self._act_window("Badminton Satışı (Kart)", "badminton.sale.genclik", [("id", "in", sales.ids)])
+
+    def action_view_badminton_sale_abonent(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sales = self.env["badminton.sale.genclik"].search(self._build_sale_domain(date_from, date_to) + [("payment_method", "=", "abonent")])
+        return self._act_window("Badminton Satışı (Abunəçi)", "badminton.sale.genclik", [("id", "in", sales.ids)])
+
+    def action_view_badminton_sale_total(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sales = self.env["badminton.sale.genclik"].search(self._build_sale_domain(date_from, date_to))
+        return self._act_window("Badminton Satışı (Ümumi)", "badminton.sale.genclik", [("id", "in", sales.ids)])
+
+    # ---------------- 3) Digər Mədaxil/Məxaric (volan.cash.flow) ----------------
+    def action_view_other_income(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        domain = self._build_cash_flow_domain(date_from, date_to) + [
+            ("transaction_type", "=", "income"),
+            ("category", "=", "other"),
+        ]
+        return self._act_window("Digər Mədaxil", "volan.cash.flow.genclik", domain, context={"default_sport_type": "badminton"})
+
+    def action_view_other_expense(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        domain = self._build_cash_flow_domain(date_from, date_to) + [
+            ("transaction_type", "=", "expense"),
+            ("category", "=", "other"),
+        ]
+        return self._act_window("Digər Məxaric", "volan.cash.flow.genclik", domain, context={"default_sport_type": "badminton"})
+
+    def action_view_other_net(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        domain = self._build_cash_flow_domain(date_from, date_to) + [("category", "=", "other")]
+        return self._act_window("Digər Axınlar (Net detalları)", "volan.cash.flow.genclik", domain, context={"default_sport_type": "badminton"})
+
+    # ---------------- 4) Giriş Hesabatı (badminton.session) ----------------
+    def _sessions_in_range(self, date_from, date_to):
+        start_dt = datetime.combine(date_from, datetime.min.time())
+        end_dt = datetime.combine(date_to, datetime.max.time())
+        return self.env["badminton.session.genclik"].search([
+            ("state", "=", "completed"),
+            ("start_time", ">=", start_dt),
+            ("start_time", "<=", end_dt),
+        ])
+
+    def action_view_entries_cash(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sessions = self._sessions_in_range(date_from, date_to).filtered(lambda s: s.payment_type == "cash")
+        return self._act_window("Girişlər (Nağd)", "badminton.session.genclik", [("id", "in", sessions.ids)])
+
+    def action_view_entries_card(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sessions = self._sessions_in_range(date_from, date_to).filtered(lambda s: s.payment_type == "card")
+        return self._act_window("Girişlər (Card to card)", "badminton.session.genclik", [("id", "in", sessions.ids)])
+
+    def action_view_entries_abonent(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sessions = self._sessions_in_range(date_from, date_to).filtered(lambda s: s.payment_type == "abonent")
+        return self._act_window("Girişlər (Abunəçi)", "badminton.session.genclik", [("id", "in", sessions.ids)])
+
+    # ---------------- 5) Tətbiq Hesabatı (badminton.session promo_type) ----------------
+    def action_view_app_onefit(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sessions = self._sessions_in_range(date_from, date_to).filtered(lambda s: s.promo_type == "1fit")
+        return self._act_window("Tətbiq Girişləri (1FIT)", "badminton.session.genclik", [("id", "in", sessions.ids)])
+
+    def action_view_app_push30(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sessions = self._sessions_in_range(date_from, date_to).filtered(lambda s: s.promo_type == "push30")
+        return self._act_window("Tətbiq Girişləri (PUSH30)", "badminton.session.genclik", [("id", "in", sessions.ids)])
+
+    def action_view_app_push30_plus(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sessions = self._sessions_in_range(date_from, date_to).filtered(lambda s: s.promo_type == "push30_plus")
+        return self._act_window("Tətbiq Girişləri (PUSH30+)", "badminton.session.genclik", [("id", "in", sessions.ids)])
+
+    def action_view_app_tripsome(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sessions = self._sessions_in_range(date_from, date_to).filtered(lambda s: s.promo_type == "tripsome")
+        return self._act_window("Tətbiq Girişləri (Tripsome)", "badminton.session.genclik", [("id", "in", sessions.ids)])
+
+    def action_view_entries_total(self):
+        date_from, date_to = self._ensure_one_and_get_range()
+        sessions = self._sessions_in_range(date_from, date_to)
+        return self._act_window("Girişlər (Ümumi)", "badminton.session.genclik", [("id", "in", sessions.ids)])

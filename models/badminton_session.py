@@ -19,6 +19,9 @@ class BadmintonSession(models.Model):
     end_time = fields.Datetime(string="Bitmə Vaxtı", readonly=True)
     duration_hours = fields.Float(string="Müddət (saat)", default=1.0, required=True)
     
+    qr_image = fields.Binary(related="partner_id.qr_code_image", string="QR Şəkli", readonly=True)
+    qr_link = fields.Char(related="partner_id.qr_link", string="QR Linki", readonly=True)
+
     promo_type = fields.Selection([
         ('1fit', '1FIT'),
         ('push30', 'PUSH30'),
@@ -155,6 +158,8 @@ class BadmintonSession(models.Model):
     @api.onchange('promo_type')
     def _onchange_promo_type(self):
         """Push30+ seçilendə müddəti 2 saat et"""
+        if self.promo_type:
+            self.payment_type = 'abonent'
         if self.promo_type == 'push30_plus':
             self.duration_hours = 2.0
         elif self.promo_type in ['1fit', 'push30', 'tripsome']:

@@ -105,68 +105,59 @@ class BadmintonLessonSimple(models.Model):
             max_day = monthrange(next_month.year, next_month.month)[1]
             lesson.end_date = next_month.replace(day=min(day, max_day))
 
-    @api.depends('payment_date', 'payment_ids', 'payment_ids.payment_date')
+    @api.depends('payment_date', 'payment_ids.payment_date', 'payment_ids.real_date')
     def _compute_subscription_payment_status(self):
-        """Başlanğıc tarixindən bu günə qədər hər ay üçün ödəniş olub-olmadığını yoxla"""
         today = fields.Date.today()
+        current_month_start = today.replace(day=1)
+
         for lesson in self:
             if not lesson.payment_date:
                 lesson.subscription_payment_status = 'on_time'
                 continue
-            
-            # Başlanğıc tarixindən bu günə qədər neçə ay keçib?
-            start_date = lesson.payment_date
-            
-            # Əgər başlama tarixi gələcəkdədirsə, hələ ödəniş lazım deyil
-            if start_date > today:
-                lesson.subscription_payment_status = 'on_time'
-                continue
-            
-            # Başlanğıcdan bu günə qədər olan ayları yarat
-            current_check = start_date.replace(day=1)  # Başlanğıc ayının 1-i
-            today_month_start = today.replace(day=1)   # Bu ayın 1-i
-            
-            missing_months = []
-            while current_check <= today_month_start:
-                # Bu ay üçün ödəniş var mı?
-                payment_found = False
-                for payment in lesson.payment_ids:
-                    if payment.payment_date:
-                        # payment_date hansı aya aiddir?
-                        pay_month_start = payment.payment_date.replace(day=1)
-                        if pay_month_start == current_check:
-                            payment_found = True
-                            break
-                
-                if not payment_found:
-                    missing_months.append(current_check)
-                
-                # Növbəti aya keç
-                current_check = current_check + relativedelta(months=1)
-            
-            # Əgər ödənilməmiş ay varsa
-            if missing_months:
-                # Ən son ödənilməmiş ay (prioritet: ən köhnə ödənilməmiş)
-                first_missing = missing_months[0]
-                payment_day = lesson.payment_date.day
-                
-                # Bu ay üçün gözlənilən ödəniş tarixi
-                max_day_in_month = monthrange(first_missing.year, first_missing.month)[1]
-                expected_day = min(payment_day, max_day_in_month)
-                expected_payment_date = first_missing.replace(day=expected_day)
-                
-                # 5 gün əvvəl xəbərdarlıq
-                warning_date = expected_payment_date - timedelta(days=5)
-                
-                if today >= expected_payment_date:
-                    lesson.subscription_payment_status = 'overdue'
-                elif today >= warning_date:
-                    lesson.subscription_payment_status = 'warning'
-                else:
-                    lesson.subscription_payment_status = 'on_time'
-            else:
-                lesson.subscription_payment_status = 'on_time'
 
+            # Ödənişin aid olduğu ayı real_date-dən götürürük (yoxdursa payment_date)
+            covered_dates = [
+                (p.real_date or p.payment_date)
+                for p in lesson.payment_ids
+                if (p.real_date or p.payment_date)
+            ]
+            last_covered = max(covered_dates) if covered_dates else None
+
+            # 1) Keçən aylardan borc var? (məs: Okt ödənilib, indi Dekabr -> Noyabr boşdur => overdue)
+            if last_covered:
+                next_month_after_last = (last_covered.replace(day=1) + relativedelta(months=1))
+                if next_month_after_last < current_month_start:
+                    lesson.subscription_payment_status = 'overdue'
+                    continue
+            else:
+                # Heç payment yoxdursa: warning pəncərəsindən sonra overdue et
+                # (istəsən birbaşa overdue də edə bilərsən)
+                pass
+
+            # 2) Cari ay üçün klassik yoxlama (5 gün əvvəl xəbərdarlıq)
+            payment_day = lesson.payment_date.day
+            max_day = monthrange(today.year, today.month)[1]
+            expected_day = min(payment_day, max_day)
+            expected_payment_date = today.replace(day=expected_day)
+            warning_date = expected_payment_date - timedelta(days=5)
+
+            # Bu ay üçün “aid olduğu” payment varmı?
+            paid_this_month = any(
+                (p.real_date or p.payment_date) and
+                (p.real_date or p.payment_date).year == today.year and
+                (p.real_date or p.payment_date).month == today.month
+                for p in lesson.payment_ids
+            )
+
+            if paid_this_month:
+                lesson.subscription_payment_status = 'on_time'
+            elif today < warning_date:
+                lesson.subscription_payment_status = 'on_time'
+            elif today < expected_payment_date:
+                lesson.subscription_payment_status = 'warning'
+            else:
+                lesson.subscription_payment_status = 'overdue'
+    
     """
     @api.depends('start_date')
     def _compute_end_date(self):
