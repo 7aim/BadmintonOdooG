@@ -115,7 +115,7 @@ class BadmintonSale(models.Model):
     @api.model
     def create(self, vals):
         if not vals.get('name') or vals.get('name') == 'Yeni':
-            vals['name'] = self.env['ir.sequence'].next_by_code('badminton.sale.genclik')
+            vals['name'] = self.env['ir.sequence'].sudo().next_by_code('badminton.sale.genclik')
             
         sale = super(BadmintonSale, self).create(vals)
         

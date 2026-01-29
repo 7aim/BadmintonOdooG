@@ -30,7 +30,7 @@ class BadmintonSaleNameMigration(models.TransientModel):
         self.ensure_one()
         
         BadmintonSale = self.env['badminton.sale.genclik']
-        sales = BadmintonSale.search([('name', '!=', False)], order='create_date asc, id asc')
+        sales = BadmintonSale.search([], order='create_date asc, id asc')
         
         _logger.info(f"Badminton satış adlarını yeniləyir: {len(sales)} satış")
         

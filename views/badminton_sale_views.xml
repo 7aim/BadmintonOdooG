@@ -63,9 +63,11 @@
                             <field name="amount_paid" style="font-size: 14px; font-weight: bold; color: #17a2b8;"/>
                         </group>
                     </group>
+                    <!-- We dont need notes field for now 
                     <group string="Qeydlər">
                         <field name="notes" nolabel="1"/>
                     </group>
+                    -->
                 </sheet>
             </form>
         </field>
