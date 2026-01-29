@@ -44,9 +44,10 @@
             <form string="Badminton Satışı">
                 <group>
                     <group string="Müştəri Məlumatları">
-                        <field name="partner_id" options="{'no_create': True}" required="1"
+                        <field name="partner_id" 
                                domain="[('is_company', '=', False), ('sport_type', 'in', ['badminton', 'both']), ('branch', '=', 'genclik')]"
-                               context="{'default_branch': 'genclik', 'default_sport_type': 'badminton'}"/>
+                               context="{'default_branch': 'genclik', 'default_sport_type': 'badminton'}"
+                               required="1"/>
                         <field name="current_balance" readonly="1" style="font-weight: bold; color: #007bff;"/>
                         <field name="monthly_balance_hours" readonly="1" string="Aylıq Balans (saat)"
                                invisible="[(monthly_balance_hours == 0)]"/>
@@ -96,6 +97,14 @@
                 </footer>
             </form>
         </field>
+    </record>
+
+    <record id="action_qr_scanner_wizard_genclik" model="ir.actions.act_window">
+        <field name="name">QR Kod Scanner</field>
+        <field name="res_model">qr.scanner.wizard.genclik</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_qr_scanner_wizard_genclik"/>
+        <field name="target">new</field>
     </record>
 
     <!-- Badminton Sale Wizard Action -->
