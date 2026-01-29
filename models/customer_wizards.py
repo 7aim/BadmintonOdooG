@@ -67,7 +67,7 @@ class BadmintonSaleWizard(models.TransientModel):
     # Qiymət məlumatları
     original_price = fields.Float(string="Endirimsiz Qiymət", readonly=True)
     discount_percent = fields.Float(string="Endirim (%)", readonly=True)
-    total_amount = fields.Float(string="Ümumi Məbləğ", readonly=True, store=True)
+    total_amount = fields.Float(string="Ümumi Məbləğ", compute='_compute_total_amount', store=True, readonly=True)
     
     # Ödəniş məlumatları
     payment_method = fields.Selection([
@@ -87,6 +87,26 @@ class BadmintonSaleWizard(models.TransientModel):
     amount_paid = fields.Float(string="Ödənilən Məbləğ", default=0.0, help="Müştərinin faktiki ödədiyi məbləğ")
     deposit_added = fields.Float(string="Depozitə Əlavə", default=0.0, help="Artıq ödənişdən depozitə əlavə edilən məbləğ")
     
+    @api.depends('package_id', 'customer_type', 'hours_quantity', 'unit_price', 'original_price', 'discount_percent')
+    def _compute_total_amount(self):
+        """Ümumi məbləği hesabla - paket və ya sadə satış üçün"""
+        for wizard in self:
+            if wizard.package_id:
+                # Paket seçilibsə, endirimli qiyməti hesabla
+                if wizard.customer_type == 'child':
+                    base_price = wizard.package_id.child_price
+                else:
+                    base_price = wizard.package_id.adult_price
+                
+                discount = wizard.package_id.discount_percent or 0.0
+                if discount > 0:
+                    wizard.total_amount = base_price * (1 - discount / 100)
+                else:
+                    wizard.total_amount = base_price
+            else:
+                # Sadə satış: saat sayı × qiymət
+                wizard.total_amount = (wizard.hours_quantity or 0) * (wizard.unit_price or 0)
+    
     @api.depends('total_amount', 'partner_id.badminton_deposit_balance', 'deposit_used')
     def _compute_amount_to_pay(self):
         """Depozit nəzərə alınaraq ödəniləcək məbləği hesabla"""
@@ -105,6 +125,11 @@ class BadmintonSaleWizard(models.TransientModel):
         if self.amount_to_pay:
             self.amount_paid = self.amount_to_pay
     
+    @api.onchange('total_amount')
+    def _onchange_total_amount(self):
+        """total_amount dəyişəndə amount_to_pay-i yenilə"""
+        self._compute_amount_to_pay()
+    
     @api.onchange('package_id', 'customer_type')
     def _onchange_package(self):
         """Paket və müştəri növünə görə qiyməti təyin et"""
@@ -120,16 +145,12 @@ class BadmintonSaleWizard(models.TransientModel):
             
             # Endirim faizini təyin et
             self.discount_percent = self.package_id.discount_percent
-            
-            # Endirimli qiyməti hesabla
-            if self.discount_percent > 0:
-                discount_amount = self.original_price * (self.discount_percent / 100)
-                self.total_amount = self.original_price - discount_amount
-            else:
-                self.total_amount = self.original_price
         else:
             self.original_price = 0
             self.discount_percent = 0
+        
+        # Total məbləği avtomatik hesabla
+        self._compute_total_amount()
     
     @api.onchange('customer_type')
     def _onchange_customer_type(self):
@@ -139,13 +160,14 @@ class BadmintonSaleWizard(models.TransientModel):
                 self.unit_price = 15.0
             else:
                 self.unit_price = 8.0
-            self._calculate_total()
+        # Total məbləği avtomatik hesabla (həm paket, həm sadə satış üçün)
+        self._compute_total_amount()
     
     @api.onchange('hours_quantity', 'unit_price')
     def _onchange_price_fields(self):
-        """Saat sayı və ya qiymət dəyişəndə ümumi məbləği hesabla"""
+        """Saat sayı və ya qiymət dəyişəndə (hətta silinəndə) ümumi məbləği yenilə"""
         if not self.package_id:
-            self._calculate_total()
+            self._compute_total_amount()
     
     @api.onchange('amount_paid', 'total_amount', 'partner_id')
     def _onchange_amount_paid(self):

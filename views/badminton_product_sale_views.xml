@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Məhsul Satışı list View -->
+    <record id="badminton_product_sale_list_view" model="ir.ui.view">
+        <field name="name">badminton.product.sale.genclik.list</field>
+        <field name="model">badminton.product.sale.genclik</field>
+        <field name="arch" type="xml">
+            <list string="Məhsul Satışları" decoration-success="state=='confirmed'" decoration-muted="state=='cancelled'">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="payment_method"/>
+                <field name="sale_date"/>
+                <field name="total_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="state" widget="badge" decoration-success="state=='confirmed'" decoration-info="state=='draft'" decoration-muted="state=='cancelled'"/>
+                <!--<field name="currency_id" invisible="1"/>-->
+            </list>
+        </field>
+    </record>
+
+    <!-- Məhsul Satışı Form View -->
+    <record id="badminton_product_sale_form_view" model="ir.ui.view">
+        <field name="name">badminton.product.sale.genclik.form</field>
+        <field name="model">badminton.product.sale.genclik</field>
+        <field name="arch" type="xml">
+            <form string="Məhsul Satışı">
+                    <header>
+                        <button name="action_confirm" string="Təsdiqlə" type="object" 
+                                invisible="state != 'draft'" class="oe_highlight"/>                      
+                        <button name="action_draft" string="Layihə" type="object" 
+                                invisible="state != 'cancelled'"/>                   
+                        <button name="action_cancel" string="Ləğv Et" type="object" 
+                                invisible="state not in ('draft', 'confirmed')" 
+                                confirm="Satışı ləğv etmək istədiyinizdən əminsiniz?"/>                  
+                        <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,cancelled"/>
+                    </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id" options="{'no_create': True}" 
+                                   domain="[('is_company', '=', False), ('sport_type', 'in', ['badminton', 'both']), ('branch', '=', 'yasamal')]"/>
+                            <field name="sale_date"/>
+                            <!--<field name="currency_id" invisible="1"/>-->
+                        </group>
+                        <group>
+                            <field name="payment_method"/>
+                            <field name="total_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Məhsullar">
+                            <field name="sale_line_ids" context="{'default_sale_id': id}">
+                                <list editable="bottom">
+                                    <field name="product_id" options="{'no_create': True}"/>
+                                    <field name="quantity"/>
+                                    <field name="unit_price" widget="monetary"/>
+                                    <field name="total_price" widget="monetary" sum="Cəm"/>
+                                    <field name="notes"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Əlavə Məlumat">
+                            <group>
+                                <field name="notes" placeholder="Əlavə qeydlər..."/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Məhsul Satışı Search View -->
+    <record id="badminton_product_sale_search_view" model="ir.ui.view">
+        <field name="name">badminton.product.sale.genclik.search</field>
+        <field name="model">badminton.product.sale.genclik</field>
+        <field name="arch" type="xml">
+            <search string="Satış Axtar">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <filter string="Layihə" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Təsdiqlənib" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Ləğv Edilib" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter string="Bu Ay" name="this_month" domain="[('sale_date', '>=', (context_today() - relativedelta(day=1)).strftime('%Y-%m-%d')), ('sale_date', '&lt;', (context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Bu Həftə" name="this_week" domain="[('sale_date', '>=', (context_today() - relativedelta(weeks=0, weekday=0)).strftime('%Y-%m-%d')), ('sale_date', '&lt;', (context_today() + relativedelta(weeks=1, weekday=0)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Bu Gün" name="today" domain="[('sale_date', '>=', context_today().strftime('%Y-%m-%d')), ('sale_date', '&lt;', (context_today() + relativedelta(days=1)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Qruplaşdır">
+                    <filter string="Müştəri" name="group_by_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Vəziyyət" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Tarix" name="group_by_date" context="{'group_by': 'sale_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Məhsul Satışı Action -->
+    <record id="badminton_product_sale_action" model="ir.actions.act_window">
+        <field name="name">Məhsul Satışları</field>
+        <field name="res_model">badminton.product.sale.genclik</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_confirmed': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                İlk məhsul satışınızı yaradın!
+            </p>
+            <p>
+                Müştəri seçin, məhsul əlavə edin və satışı təsdiqləyin.
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -34,7 +34,7 @@
                         </list>
                     </field>
                 </page>
-                <page string="Balans Tarixçəsi" name="balance_history" groups="volan_genclikk.group_genclik_satici,volan_genclikk.group_genclik_admin">
+                <!--<page string="Balans Tarixçəsi" name="balance_history" groups="volan_genclikk.group_genclik_satici,volan_genclikk.group_genclik_admin">
                     <field name="badminton_balance_history_ids" context="{'default_partner_id': id}">
                         <list string="Balans Tarixçəsi" create="false" edit="false">
                             <field name="transaction_date"/>
@@ -45,7 +45,7 @@
                             <field name="description"/>
                         </list>
                     </field>
-                </page>
+                </page>-->
             </xpath>
         </field>
     </record>

@@ -11,8 +11,9 @@ STATE_SELECTION = [
     ('active', 'Aktiv'),
     ('cancel_requested', 'Ləğv Tələbi'),
     ('cancelled', 'Ləğv Edilib'),
+    ('restore_requested', 'Bərpa Tələbi'),
     ('free', 'Ödənişsizlər'),
-    ('frozen', 'Dondurulmuş'),
+
     ('completed', 'Tamamlanıb'),
 ]
 
@@ -50,7 +51,7 @@ class BadmintonLessonSimple(models.Model):
     end_date = fields.Date(string="Cari Dövr Bitmə", compute='_compute_end_date', store=True, readonly=False)
     
     # Ödənişlər (One2Many)
-    payment_ids = fields.One2many('badminton.lesson.payment.genclik', 'lesson_id', string="Ödənişlər")
+    payment_ids = fields.One2many('badminton.lesson.payment.genclik', 'lesson_id', string="Ödənişlər", ondelete='restrict')
     last_payment_date = fields.Date(string="Ən Son Ödəniş", compute='_compute_last_payment_date', store=True)
     
     # Abunəlik məlumatları (ödənişlərə əsasən hesablanır)
@@ -104,6 +105,11 @@ class BadmintonLessonSimple(models.Model):
             day = base_day or next_month.day
             max_day = monthrange(next_month.year, next_month.month)[1]
             lesson.end_date = next_month.replace(day=min(day, max_day))
+
+    @api.onchange('payment_date')
+    def _onchange_payment_date(self):
+        """Başlama tarixi dəyişəndə bitmə tarixini yenilə"""
+        self._compute_end_date()
 
     @api.depends('payment_date', 'payment_ids', 'payment_ids.payment_date')
     def _compute_subscription_payment_status(self):
@@ -357,10 +363,13 @@ class BadmintonLessonSimple(models.Model):
     
     def write(self, vals):
 
-        if 'payment_date' in vals and self.env.user.login != 'admin':
-            for rec in self:
-                if rec.payment_date:
-                    raise ValidationError("Başlama tarixi bir dəfə təyin edildikdən sonra dəyişdirilə bilməz.")
+        # Başlama tarixini dəyişməyə icazə: yalnız admin və ya restore_requested statusuna keçərkən
+        #if 'payment_date' in vals and self.env.user.login != 'admin':
+            # Əgər restore_requested statusuna keçirikssə, icazə ver
+        #    if vals.get('state') != 'restore_requested':
+        #        for rec in self:
+        #            if rec.payment_date:
+        #                raise ValidationError("Başlama tarixi bir dəfə təyin edildikdən sonra dəyişdirilə bilməz.")
 
         """State və qrup dəyişdikdə müvafiq əməliyyatlar aparır"""
         lesson_fee_updated = 'lesson_fee' in vals
@@ -441,14 +450,25 @@ class BadmintonLessonSimple(models.Model):
 
     
     def action_return_cancelled(self):
-        """Ləğv edilmiş abunəliyi geri qaytar (yalnız cancelled üçün)"""
+        """Ləğv edilmiş abunəliyi geri qaytar - restore_requested statusuna keçir"""
         for lesson in self:
             if lesson.state != 'cancelled':
                 continue
-
+            # Başlama tarixini bugünə təyin et və bərpa tələbi statusuna keçir (eyni anda)
+            lesson.write({
+                'payment_date': fields.Date.today(),
+                'state': 'restore_requested'
+            })
+    
+    def action_restore(self):
+        """Admin restore_requested abunəlikləri əvvəlki statusuna qaytarır"""
+        for lesson in self:
+            if lesson.state != 'restore_requested':
+                continue
+            
             # Əgər 0 AZN-dirsə, qaytaranda da 'free' olsun
             target_state = 'free' if lesson._is_zero_fee(lesson.lesson_fee) else 'active'
-
+            
             # write() içindəki məntiq işləsin (active olarsa ödəniş yoxdursa avtomatik ilk ödəniş yaratsın)
             lesson.write({'state': target_state})
 
@@ -561,6 +581,23 @@ class BadmintonLessonSimple(models.Model):
                     'message': 'Abunəlik haqqını 0 etdiniz. Zəhmət olmasa "Ödənişsiz səbəb" sahəsini doldurun.'
                 }
             }
+
+    def unlink(self):
+        """Ödənişləri olan abunəliyi silməyə icazə vermə"""
+        for lesson in self:
+            # Ödənişləri yoxla
+            payments = self.env['badminton.lesson.payment.genclik'].search([
+                ('lesson_id', '=', lesson.id)
+            ])
+            if payments:
+                raise ValidationError(
+                    f'⛔ Bu abunəliyi silmək mümkün deyil!\n\n'
+                    f'Abunəlik: {lesson.name}\n'
+                    f'Ödəniş sətiirləri sayı: {len(payments)}\n\n'
+                    f'💡 Əvvəlcə bütün ödəniş sətirlərini silməlisiniz!'
+                )
+        
+        return super(BadmintonLessonSimple, self).unlink()
 
 class badmintonLessonScheduleSimple(models.Model):
     _name = 'badminton.lesson.schedule.simple.genclik'

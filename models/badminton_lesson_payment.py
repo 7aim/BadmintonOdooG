@@ -92,6 +92,11 @@ class BadmintonLessonPayment(models.Model):
 
     def write(self, vals):
         """Ödəniş dəyişdirildikdə kassanı da yenilə"""
+
+        # Admin olmayan userlər real_date-i update edə bilməz
+        if 'real_date' in vals and not self.env.user.has_group('base.group_system'):
+            vals.pop('real_date')
+
         res = super(BadmintonLessonPayment, self).write(vals)
         
         # Əgər məbləğ və ya kassaya düşmə tarixi dəyişibsə, kassanı yenilə
@@ -113,9 +118,20 @@ class BadmintonLessonPayment(models.Model):
     
     def unlink(self):
         """Ödəniş silinərkən kassadan da sil"""
-        # Əvvəlcə kassa əməliyyatını sil
         for payment in self:
+            # Kassa əməliyyatını tap və sil
+            cash_flows = self.env['volan.cash.flow.genclik'].search([
+                ('related_model', '=', 'badminton.lesson.payment.genclik'),
+                ('related_id', '=', payment.id)
+            ])
+            if cash_flows:
+                # related_model-i sıfırla ki, unlink qadağası işləməsin
+                cash_flows.write({'related_model': False, 'related_id': False})
+                cash_flows.unlink()
+            
+            # Əski sistemlə uyğunluq üçün
             if payment.cash_flow_id:
+                payment.cash_flow_id.write({'related_model': False, 'related_id': False})
                 payment.cash_flow_id.unlink()
         
         return super(BadmintonLessonPayment, self).unlink()
@@ -192,9 +208,30 @@ class BadmintonLessonPayment(models.Model):
         return ' '.join(result) + ' manat'
     
     def get_receipt_number(self):
-        """Qəbz nömrəsini qaytarır - ödəniş ID əsasında"""
+        """Qəbz nömrəsini qaytarır - ödəniş ID və ay baş hərfi əsasında"""
         self.ensure_one()
-        return f"Y{str(self.id).zfill(5)}"
+        
+        # Ayın baş hərfini götür
+        month_prefix = {
+            1: 'Y',   # Yanvar
+            2: 'F',   # Fevral
+            3: 'M',   # Mart
+            4: 'A',   # Aprel
+            5: 'M',   # May
+            6: 'İ',   # İyun
+            7: 'İ',   # İyul
+            8: 'A',   # Avqust
+            9: 'S',   # Sentyabr
+            10: 'O',  # Oktyabr
+            11: 'N',  # Noyabr
+            12: 'D',  # Dekabr
+        }
+        
+        # payment_date-dən ayı götür
+        month = self.payment_date.month if self.payment_date else 1
+        prefix = month_prefix.get(month, 'Y')
+        
+        return f"{prefix}{str(self.id).zfill(5)}"
     
     def get_service_description(self):
         """Xidmət təsvirini qaytarır"""

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Stok Update Wizard Form -->
+    <record id="badminton_stock_update_wizard_form" model="ir.ui.view">
+        <field name="name">badminton.stock.update.wizard.genclik.form</field>
+        <field name="model">badminton.stock.update.wizard.genclik</field>
+        <field name="arch" type="xml">
+            <form string="Stok Yeniləmə">
+                <group>
+                    <group>
+                        <field name="product_id" invisible="1"/>
+                        <field name="movement_type" widget="radio"/>
+                        <field name="quantity"/>
+                    </group>
+                    <group>
+                        <field name="current_stock" readonly="1"/>
+                        <field name="movement_date"/>
+                    <field name="notes" placeholder="Qeyd əlavə edin..."/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_update_stock" string="Yenilə" type="object" class="btn-primary"/>
+                    <button string="Ləğv et" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_badminton_stock_update_wizard" model="ir.actions.act_window">
+        <field name="name">Stok Yeniləmə</field>
+        <field name="res_model">badminton.stock.update.wizard.genclik</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

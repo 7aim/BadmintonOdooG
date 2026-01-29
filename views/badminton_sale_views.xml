@@ -103,14 +103,6 @@
                 <field name="customer_type"/>
                 <field name="package_type"/>
                 <field name="payment_method"/>
-                <separator/>
-                <filter string="Uşaq" name="child" domain="[('customer_type','=','child')]"/>
-                <filter string="Böyük" name="adult" domain="[('customer_type','=','adult')]"/>
-                <separator/>
-                <filter string="Tək Saat" name="single" domain="[('package_type','=','single')]"/>
-                <filter string="8 Giriş Paketi" name="package_8" domain="[('package_type','=','package_8')]"/>
-                <filter string="12 Giriş Paketi" name="package_12" domain="[('package_type','=','package_12')]"/>
-                <filter string="Aylıq Paket Satışı" name="monthly_package" domain="[('package_id.package_type', '=', 'monthly')]"/>
                 <group expand="0" string="Qrupla">
                     <filter name="group_by_partner" string="Müştəri" context="{'group_by': 'partner_id'}"/>
                     <filter name="group_by_customer_type" string="Müştəri Növü" context="{'group_by': 'customer_type'}"/>
@@ -138,7 +130,7 @@
         </field>
     </record>
 
-    <!-- Badminton Balance History list View -->
+    <!-- Badminton Balance History list View 
     <record id="view_badminton_balance_history_list" model="ir.ui.view">
         <field name="name">badminton.balance.history.genclik.list</field>
         <field name="model">badminton.balance.history.genclik</field>
@@ -155,6 +147,7 @@
             </list>
         </field>
     </record>
+    -->
 
     <!-- Action for Badminton Balance History -->
     <record id="action_badminton_balance_history" model="ir.actions.act_window">

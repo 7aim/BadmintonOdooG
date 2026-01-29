@@ -23,6 +23,11 @@
         <field name="model">volan.cash.flow.genclik</field>
         <field name="arch" type="xml">
             <form string="Kassa Əməliyyatı">
+                <header>
+                    <button name="action_view_source" string="📄 Əməliyyat" type="object" 
+                            class="oe_highlight" invisible="not has_source"
+                            help="Mənbə sənədə keçid"/>
+                </header>
                 <sheet>
                     <group>
                         <group>
@@ -35,8 +40,7 @@
                             <field name="amount"/>
                             <field name="partner_id"/>
                             <field name="notes" placeholder="Əlavə qeydlər..."/>
-                            <!--<field name="related_model" readonly="1" groups="base.group_system"/>
-                            <field name="related_id" readonly="1" groups="base.group_system"/>-->
+                            <field name="has_source" invisible="1"/>
                         </group>
                     </group>
                 </sheet>
@@ -164,7 +168,8 @@
                                     <field name="subscription_total_amount" widget="monetary" nolabel="1"
                                         style="font-size: 18px; font-weight: bold; color: #28a745;"/>
                                 </button>
-
+                                <field name="ontime_payments_amount" widget="monetary"
+                                    style="font-size: 18px; font-weight: bold; color: #17a2b8;"/>
                                 <label for="delayed_payments_amount"/>
                                 <button name="action_view_delayed_payments" type="object" class="kassa_value_btn" title="Sənədləri aç">
                                     <field name="delayed_payments_amount" widget="monetary" nolabel="1"

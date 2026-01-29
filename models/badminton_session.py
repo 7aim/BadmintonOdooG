@@ -17,7 +17,7 @@ class BadmintonSession(models.Model):
     partner_id = fields.Many2one('res.partner', string="Müştəri", required=True)
     start_time = fields.Datetime(string="Başlama Vaxtı", readonly=True)
     end_time = fields.Datetime(string="Bitmə Vaxtı", readonly=True)
-    duration_hours = fields.Float(string="Müddət (saat)", default=1.0, required=True)
+    duration_hours = fields.Float(string="Müddət", default=1.0, required=True)
     
     qr_image = fields.Binary(related="partner_id.qr_code_image", string="QR Şəkli", readonly=True)
     qr_link = fields.Char(related="partner_id.qr_link", string="QR Linki", readonly=True)
@@ -44,16 +44,22 @@ class BadmintonSession(models.Model):
     ], string="Vəziyyət", default='draft')
 
     qr_scanned = fields.Boolean(string="QR Oxunub", default=False)
-    extended_time = fields.Float(string="Əlavə Vaxt (saat)", default=0.0)
+    extended_time = fields.Float(string="Əlavə Vaxt", default=0.0)
     notes = fields.Text(string="Qeydlər")
     time_expired = fields.Boolean(string="Vaxt Bitib", compute="_compute_time_expired", store=False)
     completion_time = fields.Datetime(string="Tamamlanma Vaxtı")
     recently_completed = fields.Boolean(string="Son Tamamlanan", compute="_compute_recently_completed", store=True)
     session_package_id = fields.Many2one(
         'badminton.monthly.balance.genclik',
-        string="Paket",
+        string="Abunəlik Paketi",
         domain="[('partner_id', '=', partner_id), ('state', '=', 'active'), ('remaining_units', '>', 0)]",
         help="Sessiya üçün istifadə ediləcək aylıq paket balansi"
+    )
+    has_package = fields.Boolean(
+        string="Paket Var",
+        compute="_compute_has_package",
+        store=False,
+        help="Müştərinin aktiv paket sənədi var"
     )
     
     # Növbə sistemi
@@ -78,7 +84,21 @@ class BadmintonSession(models.Model):
                 r.recently_completed = (now - r.completion_time).total_seconds() < 900
             else:
                 r.recently_completed = False
-    
+
+    @api.depends('partner_id')
+    def _compute_has_package(self):
+        """Müştərinin aktiv paket sənədi olub-olmadığını yoxla"""
+        for rec in self:
+            if rec.partner_id:
+                package_count = self.env['badminton.monthly.balance'].search_count([
+                    ('partner_id', '=', rec.partner_id.id),
+                    ('state', '=', 'active'),
+                    ('remaining_units', '>', 0)
+                ])
+                rec.has_package = package_count > 0
+            else:
+                rec.has_package = False
+
     def _compute_queue_number(self):
         """Gözləmədə olan sessiyalar üçün növbə nömrəsini hesabla"""
         for rec in self:

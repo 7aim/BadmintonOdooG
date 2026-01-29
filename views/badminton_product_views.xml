@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Məhsul list View -->
+    <record id="badminton_product_list_view" model="ir.ui.view">
+        <field name="name">badminton.product.genclik.list</field>
+        <field name="model">badminton.product.genclik</field>
+        <field name="arch" type="xml">
+            <list string="Badminton Məhsulları">
+                <field name="name"/>
+                <field name="model"/>
+                <field name="stock_quantity" string="Stok"/>
+                <field name="price"/>
+                <field name="sale_count"/>
+                <field name="total_revenue"/>
+                <field name="active"/>
+                <!--field name="currency_id" invisible="1"/-->
+            </list>
+        </field>
+    </record>
+
+    <!-- Məhsul Form View -->
+    <record id="badminton_product_form_view" model="ir.ui.view">
+        <field name="name">badminton.product.genclik.form</field>
+        <field name="model">badminton.product.genclik</field>
+        <field name="arch" type="xml">
+            <form string="Badminton Məhsulu">
+                <header>
+                    <button name="%(action_badminton_stock_update_wizard)d" 
+                            string="📦 Stok Yeniləmə" 
+                            type="action" 
+                            class="btn-primary"
+                            context="{'default_product_id': id}"/>
+                </header>
+                <sheet>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Məhsulun adı..."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="model"/>
+                            <field name="stock_quantity" string="Stok Sayı" readonly="1"/>
+                            <field name="price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="sale_count"/>
+                            <field name="total_revenue" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Təsvir">
+                            <field name="description" placeholder="Məhsul haqqında məlumat..."/>
+                        </page>
+                        <page string="Stok Hərəkəti">
+                            <field name="stock_movement_ids">
+                                <list string="Stok Hərəkətləri" create="0" delete="0">
+                                    <field name="movement_date"/>
+                                    <field name="movement_type"/>
+                                    <field name="quantity"/>
+                                    <field name="notes"/>
+                                    <field name="balance_before"/>
+                                    <field name="balance_after"/>
+                                    <!--<field name="reference"/>-->
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Satış Tarixçəsi">
+                            <field name="sale_line_ids" readonly="1">
+                                <list>
+                                    <field name="sale_id"/>
+                                    <field name="quantity"/>
+                                    <field name="unit_price" widget="monetary"/>
+                                    <field name="total_price" widget="monetary"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Məhsul Kanban View -->
+    <record id="badminton_product_kanban_view" model="ir.ui.view">
+        <field name="name">badminton.product.genclik.kanban</field>
+        <field name="model">badminton.product.genclik</field>
+        <field name="arch" type="xml">
+            <kanban string="Badminton Məhsulları">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="model"/>
+                <field name="price"/>
+                <field name="image"/>
+                <field name="stock_quantity" string="Stok"/>
+                <field name="sale_count"/>
+                <field name="total_revenue"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill">
+                            <div class="o_kanban_image">
+                                <img t-att-src="kanban_image('badminton.product', 'image', record.id.raw_value)" alt="Product"/>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/> <field name="model"/>
+                                </strong>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <span class="badge badge-pill badge-info">
+                                            <field name="price"/> AZN
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_bottom mt-2">
+                                    <div>
+                                        <i class="fa fa-boxes"/> 
+                                        <strong><field name="stock_quantity"/> ədəd stokda</strong>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_bottom mt-2">
+                                    <div class="oe_kanban_bottom_left text-muted">
+                                        <i class="fa fa-shopping-cart"/> <field name="sale_count"/> satış
+                                    </div>
+                                    <div class="oe_kanban_bottom_right text-success">
+                                        <strong><field name="total_revenue"/> AZN</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Məhsul Search View -->
+    <record id="badminton_product_search_view" model="ir.ui.view">
+        <field name="name">badminton.product.genclik.search</field>
+        <field name="model">badminton.product.genclik</field>
+        <field name="arch" type="xml">
+            <search string="Məhsul Axtar">
+                <field name="name"/>
+                <filter string="Aktiv" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Arxiv" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Qruplaşdır">
+                    <filter string="Qiymət" name="group_by_price" context="{'group_by': 'price'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Məhsul Action -->
+    <record id="badminton_product_action" model="ir.actions.act_window">
+        <field name="name">Məhsullar</field>
+        <field name="res_model">badminton.product.genclik</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                İlk məhsulunuzu yaradın!
+            </p>
+            <p>
+                Badminton məhsullarınızı əlavə edin və satışlarınızı izləyin.
+            </p>
+        </field>
+    </record>
+</odoo>

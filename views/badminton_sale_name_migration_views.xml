@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Badminton Sale Name Migration Wizard Form -->
+    <record id="view_badminton_sale_name_migration_form_genclik" model="ir.ui.view">
+        <field name="name">badminton.sale.name.migration.form.genclik</field>
+        <field name="model">badminton.sale.name.migration.genclik</field>
+        <field name="arch" type="xml">
+            <form string="Satış Nömrələrini Yenilə">
+                <group>
+                    <field name="sale_count" readonly="1"/>
+                </group>
+                <div class="alert alert-info" role="alert">
+                    <p>Bu əməliyyat bütün köhnə və dublikat badminton satış nömrələrini yeni unikal S- prefiksli nömrələrlə əvəz edəcək.</p>
+                </div>
+                <footer>
+                    <button name="action_migrate_sale_names" string="Yenilə" type="object" class="btn-primary"/>
+                    <button string="Ləğv et" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for Migration Wizard -->
+    <record id="action_badminton_sale_name_migration_genclik" model="ir.actions.act_window">
+        <field name="name">Satış Nömrələrini Yenilə</field>
+        <field name="res_model">badminton.sale.name.migration.genclik</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Item 
+    <menuitem id="menu_badminton_sale_name_migration_genclik"
+              name="Satış Nömrələrini Yenilə"
+              parent="menu_sport_main"
+              action="action_badminton_sale_name_migration_genclik"
+              sequence="999"/>
+    -->
+</odoo>

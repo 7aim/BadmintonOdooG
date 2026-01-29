@@ -50,16 +50,18 @@
                             <field name="partner_id" 
                                    domain="[('is_company', '=', False), ('sport_type', 'in', ['badminton', 'both']), ('branch', '=', 'genclik')]"
                                    context="{'default_branch': 'genclik', 'default_sport_type': 'badminton'}"
-                                   required="1"/>
-                            <field name="session_package_id" invisible="partner_id == False"/>
-                            <field name="promo_type"/>
-                            <field name="payment_type"/>
+                                   required="1"
+                                   readonly="state != 'draft'"/>
+                            <field name="has_package" invisible="1"/>
+                            <field name="session_package_id" invisible="not has_package" readonly="state != 'draft'"/>
+                            <field name="promo_type" readonly="state != 'draft'"/>
+                            <field name="payment_type" readonly="state != 'draft'"/>
                             <field name="duration_hours" readonly="state != 'draft'"/>
                             <field name="start_time" readonly="1"/>
                             <field name="end_time" readonly="1"/>
                             <field name="completion_time" readonly="1" invisible="[('state', '!=', 'completed')]"/>
                             <field name="qr_scanned" readonly="1"/>
-                            <field name="qr_link"/>
+                            <field name="qr_link" readonly="state != 'draft'"/>
                         </group>
                         <group>
                             <field name="extended_time" readonly="1"/>
@@ -69,11 +71,47 @@
                     </group>
                     <notebook>
                         <page string="Qeydlər">
-                            <field name="notes"/>
+                            <field name="notes" readonly="state != 'draft'"/>
                         </page>
                     </notebook>
                 </sheet>
             </form>
+        </field>
+    </record>
+
+    <!-- Search View with Filters -->
+    <record id="view_badminton_session_genclik_search" model="ir.ui.view">
+        <field name="name">badminton.session.genclik.search</field>
+        <field name="model">badminton.session.genclik</field>
+        <field name="arch" type="xml">
+            <search string="Sessiyalar">
+                <field name="name" string="Sessiya Nömrəsi"/>
+                <field name="partner_id" string="Müştəri"/>
+                <field name="session_package_id" string="Paket"/>
+                <separator/>
+                <filter string="Gözləmədə" name="filter_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Aktiv" name="filter_active" domain="[('state', '=', 'active')]"/>
+                <filter string="Uzadılıb" name="filter_extended" domain="[('state', '=', 'extended')]"/>
+                <filter string="Tamamlanıb" name="filter_completed" domain="[('state', '=', 'completed')]"/>
+                <filter string="Ləğv edilib" name="filter_cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter string="1FIT" name="filter_1fit" domain="[('promo_type', '=', '1fit')]"/>
+                <filter string="PUSH30" name="filter_push30" domain="[('promo_type', '=', 'push30')]"/>
+                <filter string="PUSH30+" name="filter_push30_plus" domain="[('promo_type', '=', 'push30_plus')]"/>
+                <filter string="Tripsome" name="filter_tripsome" domain="[('promo_type', '=', 'tripsome')]"/>
+                <separator/>
+                <filter string="Nağd" name="filter_cash" domain="[('payment_type', '=', 'cash')]"/>
+                <filter string="Kartdan karta" name="filter_card" domain="[('payment_type', '=', 'card')]"/>
+                <filter string="Abunəçi" name="filter_abonent" domain="[('payment_type', '=', 'abonent')]"/>
+                <separator/>
+                <group expand="0" string="Qruplaşdırma">
+                    <filter string="Müştəri" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Vəziyyət" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Paket" name="group_package" context="{'group_by': 'session_package_id'}"/>
+                    <filter string="Tətbiq" name="group_promo" context="{'group_by': 'promo_type'}"/>
+                    <filter string="Ödəniş Növü" name="group_payment" context="{'group_by': 'payment_type'}"/>
+                </group>
+            </search>
         </field>
     </record>
 
@@ -90,7 +128,7 @@
                   decoration-info="state=='extended' and not warn10_sent"
                   decoration-primary="recently_completed">
                     -->
-                <field name="name"/>
+                <!--<field name="name"/>-->
                 <field name="partner_id"/>
                 <field name="session_package_id"/>
                 <field name="promo_type"/>
@@ -99,6 +137,7 @@
                 <field name="end_time"/>
                 <field name="completion_time"/>
                 <field name="duration_hours"/>
+                <field name="extended_time"/>
                 <field name="state"/>
                 <field name="recently_completed" invisible="1"/>
                 <field name="warn10_sent" invisible="1"/>
@@ -109,6 +148,40 @@
                 <button name="complete_session" string="Tamamla" type="object" icon="fa-check"
                         invisible="state not in ['active', 'extended']"/>
             </list>
+        </field>
+    </record>
+
+    <!-- Active Sessions Search View -->
+    <record id="view_active_sessions_genclik_search" model="ir.ui.view">
+        <field name="name">active.badminton.session.genclik.search</field>
+        <field name="model">badminton.session.genclik</field>
+        <field name="arch" type="xml">
+            <search string="Aktiv Sessiyalar">
+                <field name="name" string="Sessiya Nömrəsi"/>
+                <field name="partner_id" string="Müştəri"/>
+                <field name="session_package_id" string="Paket"/>
+                <separator/>
+                <filter string="Gözləmədə" name="filter_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Aktiv" name="filter_active" domain="[('state', '=', 'active')]"/>
+                <filter string="Uzadılıb" name="filter_extended" domain="[('state', '=', 'extended')]"/>
+                <separator/>
+                <filter string="1FIT" name="filter_1fit" domain="[('promo_type', '=', '1fit')]"/>
+                <filter string="PUSH30" name="filter_push30" domain="[('promo_type', '=', 'push30')]"/>
+                <filter string="PUSH30+" name="filter_push30_plus" domain="[('promo_type', '=', 'push30_plus')]"/>
+                <filter string="Tripsome" name="filter_tripsome" domain="[('promo_type', '=', 'tripsome')]"/>
+                <separator/>
+                <filter string="Nağd" name="filter_cash" domain="[('payment_type', '=', 'cash')]"/>
+                <filter string="Kartdan karta" name="filter_card" domain="[('payment_type', '=', 'card')]"/>
+                <filter string="Abunəçi" name="filter_abonent" domain="[('payment_type', '=', 'abonent')]"/>
+                <separator/>
+                <group expand="0" string="Qruplaşdırma">
+                    <filter string="Müştəri" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Vəziyyət" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Paket" name="group_package" context="{'group_by': 'session_package_id'}"/>
+                    <filter string="Tətbiq" name="group_promo" context="{'group_by': 'promo_type'}"/>
+                    <filter string="Ödəniş Növü" name="group_payment" context="{'group_by': 'payment_type'}"/>
+                </group>
+            </search>
         </field>
     </record>
 
@@ -177,6 +250,7 @@
         <field name="res_model">badminton.session.genclik</field>
         <field name="view_mode">list,form</field>
         <field name="view_id" ref="view_badminton_session_genclik_list"/> <!-- ƏSAS SƏTİR -->
+        <field name="search_view_id" ref="view_badminton_session_genclik_search"/>
         <field name="context">{}</field>
     </record>
 
@@ -185,6 +259,7 @@
         <field name="res_model">badminton.session.genclik</field>
         <field name="view_mode">list,form</field>
         <field name="view_id" ref="view_active_sessions_list"/>
+        <field name="search_view_id" ref="view_active_sessions_genclik_search"/>
         <field name="domain">[('state', 'in', ['draft', 'active', 'extended'])]</field>
         <field name="context">{
             'create': False,

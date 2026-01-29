@@ -33,18 +33,84 @@ class CashFlow(models.Model):
     partner_id = fields.Many2one('res.partner', string='Müştəri')
     related_model = fields.Char('Əlaqəli Model', readonly=True)
     related_id = fields.Integer('Əlaqəli ID', readonly=True)
+    has_source = fields.Boolean('Mənbə Sənəd Var', compute='_compute_has_source', store=False)
     
-    @api.constrains('amount', 'transaction_type')
-    def _check_negative_balance(self):
-        """Xərc əməliyyatı balansı mənfiyə düşürməməlidir"""
+    @api.depends('related_model', 'related_id')
+    def _compute_has_source(self):
+        """Mənbə sənədin olub-olmadığını yoxla"""
         for record in self:
-            if record.transaction_type == 'expense':
-                # Cari balansı hesablayırıq
-                cash_balance = self.env['volan.cash.balance'].create({})
-                if cash_balance.current_balance < record.amount:
-                    raise ValidationError('Xəbərdarlıq: Yetərsiz balans! Bu xərc əməliyyatı balansı mənfiyə düşürəcək. '
-                                          'Cari balans: {:.2f}, Xərc məbləği: {:.2f}'.format(
-                                              cash_balance.current_balance, record.amount))
+            record.has_source = bool(record.related_model and record.related_id)
+    
+    def action_view_source(self):
+        """Mənbə sənədə keçid et"""
+        self.ensure_one()
+        if not self.related_model or not self.related_id:
+            raise ValidationError('Bu kassa əməliyyatının mənbə sənədi yoxdur!')
+        
+        # Model adını tap
+        try:
+            model_obj = self.env[self.related_model].browse(self.related_id)
+            if not model_obj.exists():
+                raise ValidationError('Mənbə sənəd tapılmadı! Ola bilsin silinib.')
+        except Exception:
+            raise ValidationError(f'Model "{self.related_model}" tapılmadı!')
+        
+        # Əgər payment modelidirsə, əsas lesson-a keçid et
+        target_model = self.related_model
+        target_id = self.related_id
+        
+        if 'payment' in self.related_model.lower():
+            # Ödəniş modelindən əsas dərs abunəliyinə keçid
+            if hasattr(model_obj, 'lesson_id') and model_obj.lesson_id:
+                target_model = model_obj.lesson_id._name
+                target_id = model_obj.lesson_id.id
+        
+        # View-ə keçid
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Mənbə Əməliyyat',
+            'res_model': target_model,
+            'res_id': target_id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
+    
+    def unlink(self):
+        """Mənbə sənədi olan kassa əməliyyatını silməyə icazə vermə"""
+        for record in self:
+            if record.related_model and record.related_id:
+                raise ValidationError(
+                    f'⛔ Bu kassa əməliyyatı "{record.name}" bir sənəd tərəfindən yaradılıb!\n\n'
+                    f'Silmək üçün əsas sənədi silməlisiniz.\n'
+                )
+        return super(CashFlow, self).unlink()
+    
+    #@api.constrains('amount', 'transaction_type')
+    #def _check_negative_balance(self):
+    #    """Xərc əməliyyatı balansı mənfiyə düşürməməlidir"""
+    #    for record in self:
+    #        if record.transaction_type == 'expense':
+    #            # Cari balansı hesablayırıq
+    #            cash_balance = self.env['volan.cash.balance'].create({})
+    #            if cash_balance.current_balance < record.amount:
+    #                raise ValidationError('Xəbərdarlıq: Yetərsiz balans! Bu xərc əməliyyatı balansı mənfiyə düşürəcək. '
+    #                                      'Cari balans: {:.2f}, Xərc məbləği: {:.2f}'.format(
+    #                                              cash_balance.current_balance, record.amount))
+
+    @api.model
+    def create(self, vals):
+        """Yazarkən xərc üçün balans yoxlaması"""
+        # Əvvəlcə yaratmadan xərc və məbləğ kontrolunu yoxlayaq
+        if vals.get('transaction_type') == 'expense':
+            amount = vals.get('amount', 0)
+            sport_type = vals.get('sport_type', 'general')
+            #if amount > 0:  # Məbləğ müsbət olarsa (xərclər üçün normal)
+            #    current_balance = self._get_current_balance_by_sport(sport_type)
+            #    if current_balance < amount:
+            #        raise ValidationError('Xəbərdarlıq: Yetərsiz balans! Bu xərc əməliyyatı balansı mənfiyə düşürəcək. '
+            #                              'Cari balans: {:.2f}, Xərc məbləği: {:.2f}'.format(
+            #                                  current_balance, amount))
+        return super(CashFlow, self).create(vals)
 
 class BadmintonCashBalance(models.TransientModel):
     _name = 'badminton.cash.balance.genclik'
@@ -90,6 +156,10 @@ class BadmintonCashBalance(models.TransientModel):
     delayed_payments_amount = fields.Float('⏰ Gecikmiş Ödənişlər', readonly=True,
                                           help="Real_date bu tarix aralığında olan amma payment_date başqa tarixdə olan ödənişlər")
 
+    # Gecikməyən ödənişlər (məlumat xarakterli)
+    ontime_payments_amount = fields.Float('✅ Aylıq net nəticə', readonly=True, compute='_compute_ontime_payments',
+                                         help="Abunəlik Ümumi - Gecikmiş Ödənişlər")
+
     cash_entries = fields.Integer('💵 Nağd Girişlər', readonly=True)
     card_entries = fields.Integer('💳 Card to Card Girişlər', readonly=True)
     abonent_entries = fields.Integer('🎫 Abunəçi Girişlər', readonly=True)
@@ -110,6 +180,13 @@ class BadmintonCashBalance(models.TransientModel):
         metrics = self._gather_metrics(override=res)
         res.update(metrics)
         return res
+
+    @api.depends('subscription_total_amount', 'delayed_payments_amount')
+    def _compute_ontime_payments(self):
+        """Gecikməyən ödənişləri hesabla: Abunəlik Ümumi - Gecikmiş Ödənişlər"""
+        for record in self:
+            record.ontime_payments_amount = record.subscription_total_amount - record.delayed_payments_amount
+
 
     def _resolve_filter_state(self, override=None):
         if override:
@@ -482,8 +559,15 @@ class BadmintonCashBalance(models.TransientModel):
             ('date', '<=', date_to),
         ]).mapped('amount'))
 
+        # Xərcləri çıxırıq
+        other_expense = sum(cash_flow_obj.search([
+            ('sport_type', '=', 'badminton'),
+            ('transaction_type', '=', 'expense'),
+            ('date', '<=', date_to),
+        ]).mapped('amount'))
+
         return (subscription_cash + subscription_card +
-                sale_cash + sale_card + sale_abonent + other_income)
+                sale_cash + sale_card + sale_abonent + other_income - other_expense)
 
     def _compute_cashbox_metrics(self, metrics, override=None):
         state = self._resolve_filter_state(override)
@@ -493,10 +577,18 @@ class BadmintonCashBalance(models.TransientModel):
             date_to = fields.Date.today()
             
         all_time_total = self._compute_all_time_overall_total(date_to)
-        current_total = metrics.get('overall_total_income', 0.0)
+        
+        # İlkin Qalıq = seçilmiş intervaldan ƏVVƏL olan balans
+        if date_from:
+            date_before = date_from - timedelta(days=1)
+            initial_balance = self._compute_all_time_overall_total(date_before)
+        else:
+            initial_balance = 0.0
+        
         return {
             'cashbox_balance': all_time_total,
-            'initial_balance': all_time_total - current_total,
+            'initial_balance': initial_balance,
+            'overall_total_income': all_time_total,  # Ümumi Qalıq = Son Qalıq
         }
 
     def _compute_payment_summary(self, metrics):

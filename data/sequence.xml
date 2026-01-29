@@ -34,9 +34,8 @@
     <record id="seq_badminton_sale" model="ir.sequence">
         <field name="name">Badminton Sale Sequence</field>
         <field name="code">badminton.sale.genclik</field>
-        <field name="prefix">BSL</field>
-        <field name="padding">3</field>
-        <field name="number_next">1</field>
+        <field name="prefix">S-</field>
+        <field name="padding">5</field>
         <field name="number_increment">1</field>
     </record>
 

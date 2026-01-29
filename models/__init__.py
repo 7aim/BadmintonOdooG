@@ -1,6 +1,7 @@
 from . import res_partner
 from . import badminton_session
 from . import badminton_sale
+from . import badminton_sale_name_migration
 from . import badminton_group
 from . import badminton_package
 from . import badminton_lesson_freeze
@@ -16,3 +17,7 @@ from . import session_extend_wizard
 from . import badminton_attendance_check
 from . import cash
 from . import badminton_session_filter
+from . import badminton_product
+from . import badminton_product_sale
+from . import badminton_stock_movement
+from . import badminton_stock_update_wizard

@@ -8,8 +8,11 @@ class BadmintonSale(models.Model):
     _name = 'badminton.sale.genclik'
     _description = 'Badminton Satışı'
     _order = 'create_date desc'
+    _sql_constraints = [
+        ('name_unique', 'UNIQUE(name)', 'Satış nömrəsi unikal olmalıdır!')
+    ]
     
-    name = fields.Char(string="Satış Nömrəsi", readonly=True, default="Yeni")
+    name = fields.Char(string="Satış Nömrəsi", readonly=True, default="Yeni", copy=False)
     partner_id = fields.Many2one('res.partner', string="Müştəri", required=True)
     package_id = fields.Many2one('badminton.package.genclik', string="Paket")
     
@@ -111,9 +114,9 @@ class BadmintonSale(models.Model):
     
     @api.model
     def create(self, vals):
-        if vals.get('name', 'Yeni') == 'Yeni':
-            vals['name'] = self.env['ir.sequence'].next_by_code('badminton.sale.genclik') or 'BS001'
-        
+        if not vals.get('name') or vals.get('name') == 'Yeni':
+            vals['name'] = self.env['ir.sequence'].next_by_code('badminton.sale.genclik')
+            
         sale = super(BadmintonSale, self).create(vals)
         
         # Əgər satış 'paid' vəziyyətində yaradılırsa, dərhal balansı artır və kassaya əlavə et
@@ -195,6 +198,21 @@ class BadmintonSale(models.Model):
             if sale.state in ['draft', 'confirmed']:
                 sale.state = 'cancelled'
     
+    def unlink(self):
+        """Satış silinərkən əlaqəli kassa əməliyyatını da sil"""
+        # Əvvəlcə kassa əməliyyatlarını tap və sil
+        for sale in self:
+            cash_flows = self.env['volan.cash.flow.genclik'].search([
+                ('related_model', '=', 'badminton.sale.genclik'),
+                ('related_id', '=', sale.id)
+            ])
+            if cash_flows:
+                # related_model-i sıfırla ki, unlink qadağası işləməsin
+                cash_flows.write({'related_model': False, 'related_id': False})
+                cash_flows.unlink()
+        
+        return super(BadmintonSale, self).unlink()
+    
     def _add_hours_to_customer(self):
         """Müştəri hesabına badminton saatlarını əlavə edir"""
         for sale in self:
@@ -264,7 +282,7 @@ class BadmintonBalanceHistory(models.Model):
     
     partner_id = fields.Many2one('res.partner', string="Müştəri", required=True)
     sale_id = fields.Many2one('badminton.sale.genclik', string="Satış")
-    session_id = fields.Many2one('badminton.session', string="Sessiya")
+    session_id = fields.Many2one('badminton.session.genclik', string="Sessiya")
     
     transaction_type = fields.Selection([
         ('purchase', 'Alış'),
