@@ -29,7 +29,7 @@
                         <group>
                             <field name="partner_id" options="{'no_create': True}" 
                                    domain="[('is_company', '=', False), ('sport_type', 'in', ['badminton', 'both']), ('branch', '=', 'genclik')]"/>
-                            <field name="customer_type"/>
+                            <!--<field name="customer_type"/>-->
                             <field name="package_id"/>
                             <field name="package_type"/>
                             <field name="sale_date"/>
@@ -81,7 +81,7 @@
             <list string="Badminton Satışları" decoration-success="state=='paid'" decoration-info="state=='confirmed'" decoration-muted="state=='cancelled'">
                 <field name="name"/>
                 <field name="partner_id"/>
-                <field name="customer_type"/>
+                <!--<field name="customer_type"/>-->
                 <field name="package_id"/>
                 <field name="package_type"/>
                 <field name="payment_method"/>
@@ -102,12 +102,11 @@
             <search string="Badminton Satışları">
                 <field name="name"/>
                 <field name="partner_id"/>
-                <field name="customer_type"/>
+                <!--<field name="customer_type"/>-->
                 <field name="package_type"/>
                 <field name="payment_method"/>
                 <group expand="0" string="Qrupla">
                     <filter name="group_by_partner" string="Müştəri" context="{'group_by': 'partner_id'}"/>
-                    <filter name="group_by_customer_type" string="Müştəri Növü" context="{'group_by': 'customer_type'}"/>
                     <filter name="group_by_package_type" string="Paket Növü" context="{'group_by': 'package_type'}"/>
                     <filter name="group_by_state" string="Vəziyyət" context="{'group_by': 'state'}"/>
                     <filter name="group_by_date" string="Tarix" context="{'group_by': 'sale_date'}"/>

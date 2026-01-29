@@ -55,13 +55,13 @@
                     <group string="Paket Satışı">
                         <field name="package_id" domain="[('active', '=', True), ('package_type', 'in', ['sale', 'monthly'])]"/>
                         <field name="payment_method"/>
-                        <field name="customer_type" invisible="not package_id"/>
+                        <!--<field name="customer_type" invisible="not package_id"/>-->
                         <field name="is_gedis_package" readonly="1" invisible="[(package_id == False)]"/>
                     </group>
                 </group>
                 <group string="Sadə Satış (Paket seçilmədikdə)" invisible="package_id">
                     <group>
-                        <field name="customer_type"/>
+                        <!--<field name="customer_type"/>-->
                         <field name="hours_quantity"/>
                     </group>
                     <group>

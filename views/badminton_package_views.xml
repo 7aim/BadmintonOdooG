@@ -21,7 +21,7 @@
                     <group string="Qiymətlər">
                         <group>
                             <field name="adult_price"/>
-                            <field name="child_price"/>
+                            <!--<field name="child_price"/>-->
                         </group>
                         <group>
                             <field name="balance_count" invisible="package_type == 'subscription'"/>
@@ -43,7 +43,7 @@
                 <field name="is_gedis_package"/>
                 <field name="discount_percent"/>
                 <field name="adult_price"/>
-                <field name="child_price"/>
+                <!--<field name="child_price"/>-->
                 <field name="balance_count" invisible="package_type == 'subscription'"/>
                 <field name="active"/>
             </list>
