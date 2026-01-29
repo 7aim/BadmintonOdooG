@@ -29,9 +29,11 @@
                                widget="text" style="font-size: 14px; font-weight: bold;"/>
                     </group>
                     
+                    <!-- Hide Session id in Qr scaner message 
                     <group invisible="not session_id">
                         <field name="session_id" readonly="1"/>
                     </group>
+                    -->
                     
                     <group invisible="not attendance_id">
                         <field name="attendance_id" readonly="1"/>
