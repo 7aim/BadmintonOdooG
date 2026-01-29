@@ -4,7 +4,7 @@ from odoo.exceptions import ValidationError
 
 class BadmintonProductSale(models.Model):
     _name = 'badminton.product.sale.genclik'
-    _description = 'Badminton Raket Satışı'
+    _description = 'Badminton Raketka Satışı'
     _order = 'sale_date desc, id desc'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     
@@ -19,7 +19,7 @@ class BadmintonProductSale(models.Model):
     ], string="Ödəniş Metodu", default='cash', tracking=True)
 
     # Satış xətləri
-    sale_line_ids = fields.One2many('badminton.product.sale.line.genclik', 'sale_id', string="Raket")
+    sale_line_ids = fields.One2many('badminton.product.sale.line.genclik', 'sale_id', string="Raketka")
     
     # Ümumi məbləğ
     total_amount = fields.Float(string="Ümumi Məbləğ (AZN)", compute='_compute_total_amount', 
@@ -59,7 +59,7 @@ class BadmintonProductSale(models.Model):
         """Satışı təsdiqlə və stokdan azalt"""
         for sale in self:
             if not sale.sale_line_ids:
-                raise ValidationError("Ən azı bir raket əlavə etməlisiniz!")
+                raise ValidationError("Ən azı bir raketka əlavə etməlisiniz!")
             
             # Stokdan azalt və hərəkət yarat
             for line in sale.sale_line_ids:
@@ -99,10 +99,10 @@ class BadmintonProductSale(models.Model):
 
 class BadmintonProductSaleLine(models.Model):
     _name = 'badminton.product.sale.line.genclik'
-    _description = 'Badminton Raket Satış Xətti'
+    _description = 'Badminton Raketka Satış Xətti'
     
     sale_id = fields.Many2one('badminton.product.sale.genclik', string="Satış", required=True, ondelete='cascade')
-    product_id = fields.Many2one('badminton.product.genclik', string="Raket", required=True)
+    product_id = fields.Many2one('badminton.product.genclik', string="Raketka", required=True)
     
     # Qiymət məlumatları
     quantity = fields.Integer(string="Miqdar", required=True, default=1)
@@ -120,7 +120,7 @@ class BadmintonProductSaleLine(models.Model):
     
     @api.onchange('product_id')
     def _onchange_product_id(self):
-        """Raket seçildikdə avtomatik qiyməti doldur"""
+        """Raketka seçildikdə avtomatik qiyməti doldur"""
         if self.product_id:
             self.unit_price = self.product_id.price
     

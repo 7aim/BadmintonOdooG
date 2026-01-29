@@ -62,13 +62,13 @@
 
     <!-- Məhsul İdarəetmə Menyusu -->
     <menuitem id="badminton_product_menu"
-              name="🏷️ Raket Satışı"
+              name="🏷️ Raketka Satışı"
               parent="volan_genclikk.menu_sport_main"
               sequence="34"/>
 
     <!-- Məhsullar -->
     <menuitem id="badminton_product_submenu"
-              name="🏸 Raketlər"
+              name="🏸 Raketkalar"
               parent="badminton_product_menu"
               action="badminton_product_action"
               sequence="10"/>

@@ -4,10 +4,10 @@ from odoo.exceptions import ValidationError
 
 class BadmintonProduct(models.Model):
     _name = 'badminton.product.genclik'
-    _description = 'Badminton Raketləri'
+    _description = 'Badminton Raketkaları'
     _order = 'name'
     
-    name = fields.Char(string="Raket Adı", required=True, tracking=True)
+    name = fields.Char(string="Raketka Adı", required=True, tracking=True)
     image = fields.Binary(string="Şəkil", attachment=True)
     price = fields.Float(string="Qiymət (AZN)", required=True, digits=(10, 2), tracking=True)
     model = fields.Selection([
@@ -54,5 +54,5 @@ class BadmintonProduct(models.Model):
         return super(BadmintonProduct, self).create(vals_list)
 
     _sql_constraints = [
-        ('name_unique', 'unique(name)', 'Bu adda raket artıq mövcuddur!')
+        ('name_unique', 'unique(name)', 'Bu adda raketka artıq mövcuddur!')
     ]
