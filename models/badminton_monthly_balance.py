@@ -78,6 +78,7 @@ class BadmintonMonthlyBalance(models.Model):
         if not expired_lines:
             return True
 
+        """ Close history
         history_model = self.env['badminton.balance.history.genclik']
         for line in expired_lines:
             before = line.remaining_units
@@ -95,3 +96,4 @@ class BadmintonMonthlyBalance(models.Model):
                 'description': f"Aylıq paket müddəti bitdi ({fields.Date.to_string(line.expiry_date)})"
             })
         return True
+        """

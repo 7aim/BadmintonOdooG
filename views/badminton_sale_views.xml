@@ -149,11 +149,12 @@
     </record>
     -->
 
-    <!-- Action for Badminton Balance History -->
+    <!-- Action for Badminton Balance History 
     <record id="action_badminton_balance_history" model="ir.actions.act_window">
         <field name="name">Badminton Balans Tarixçəsi</field>
         <field name="res_model">badminton.balance.history.genclik</field>
         <field name="view_mode">list</field>
         <field name="context">{}</field>
     </record>
+    -->
 </odoo>

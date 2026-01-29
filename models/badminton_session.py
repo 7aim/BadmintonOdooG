@@ -90,7 +90,7 @@ class BadmintonSession(models.Model):
         """Müştərinin aktiv paket sənədi olub-olmadığını yoxla"""
         for rec in self:
             if rec.partner_id:
-                package_count = self.env['badminton.monthly.balance'].search_count([
+                package_count = self.env['badminton.monthly.balance.genclik'].search_count([
                     ('partner_id', '=', rec.partner_id.id),
                     ('state', '=', 'active'),
                     ('remaining_units', '>', 0)
@@ -211,7 +211,7 @@ class BadmintonSession(models.Model):
         if self.session_package_id:
             self._consume_selected_package(required_hours, 'usage', f"Sessiya başladıldı: {self.name}")
         else:
-            self.partner_id.consume_badminton_hours(
+            self.partner_id.consume_genclik_badminton_hours(
                 required_hours,
                 transaction_type='usage',
                 description=f"Sessiya başladıldı: {self.name}",
@@ -303,7 +303,7 @@ class BadmintonSession(models.Model):
                     f"Sessiya uzadıldı: {s.name} (+{additional_hours} saat)"
                 )
             else:
-                s.partner_id.consume_badminton_hours(
+                s.partner_id.consume_genclik_badminton_hours(
                     additional_hours,
                     transaction_type='extension',
                     description=f"Sessiya uzadıldı: {s.name} (+{additional_hours} saat)",
@@ -335,6 +335,7 @@ class BadmintonSession(models.Model):
             )
 
         units_used, before, after = line.consume_hours(hours)
+        """ Close history 
         self.env['badminton.balance.history.genclik'].create({
             'partner_id': self.partner_id.id,
             'session_id': self.id,
@@ -346,6 +347,7 @@ class BadmintonSession(models.Model):
             'balance_channel': 'monthly',
             'monthly_line_id': line.id,
         })
+        """
 
     def action_extend_session_wizard(self):
         return {
