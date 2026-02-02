@@ -28,7 +28,7 @@ class CashFlow(models.Model):
         ('badminton', 'Badminton'),
         ('basketball', 'Basketbol'),
         ('general', 'Ümumi')
-    ], string='İdman Növü', required=True, default='general', help='Bu əməliyyatın hansı idman növünə aid olduğunu göstərir')
+    ], string='İdman Növü', required=True, default='badminton', help='Bu əməliyyatın hansı idman növünə aid olduğunu göstərir')
     notes = fields.Text('Qeydlər')
     partner_id = fields.Many2one('res.partner', string='Müştəri')
     related_model = fields.Char('Əlaqəli Model', readonly=True)
