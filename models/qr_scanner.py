@@ -74,12 +74,12 @@ class QRScannerWizard(models.TransientModel):
                 # Gözləmədə statusunda yeni sessiya yarat (balans hələ azaldılmır)
                 session = self.env['badminton.session.genclik'].create({
                     'partner_id': partner_id,
-                    'state': 'draft',  # Gözləmədə
+                    'state': 'active',  # Gözləmədə
                     'qr_scanned': True,
                     'duration_hours': 1.0,
                 })
 
-                self.result_message = f"✅ SESSİYA YARADILDI (Gözləmədə)!\n👤 Müştəri: {partner.name}\n💰 Balans: {current_balance} saat\n 🔢 Növbə: {session.queue_number}"
+                self.result_message = f"✅ SESSİYA YARADILDI (Aktiv)!\n👤 Müştəri: {partner.name}\n💰 Balans: {current_balance} saat\n 🔢 Növbə: {session.queue_number}"
                 self.session_id = session.id
                 
                 return self._return_wizard()
@@ -217,4 +217,6 @@ class QRScannerWizard(models.TransientModel):
         self.result_message = False
         self.session_id = False
         self.attendance_id = False
+        self.partner_id = False
+        self.partner_image = False
         return self._return_wizard()

@@ -52,6 +52,8 @@
                                    context="{'default_branch': 'genclik', 'default_sport_type': 'badminton'}"
                                    required="1"
                                    readonly="state != 'draft'"/>
+                            <field name="partner_mobile" widget="phone"/>
+                            <field name="partner_whatsapp_link" widget="url" string="WhatsApp" invisible="not partner_whatsapp_link"/>
                             <field name="has_package" invisible="1"/>
                             <field name="session_package_id" invisible="not has_package" readonly="state != 'draft'"/>
                             <field name="promo_type" readonly="state != 'draft'"/>

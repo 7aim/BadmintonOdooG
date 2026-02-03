@@ -503,7 +503,7 @@ class BadmintonCashBalance(models.TransientModel):
         push30_entries = len(sessions.filtered(lambda s: s.promo_type == 'push30'))
         push30_plus_entries = len(sessions.filtered(lambda s: s.promo_type == 'push30_plus'))
         tripsome_entries = len(sessions.filtered(lambda s: s.promo_type == 'tripsome'))
-        total_entries = len(sessions)
+        total_entries = onefit_entries + push30_entries + push30_plus_entries + tripsome_entries
 
         return {
             'cash_entries': cash_entries,

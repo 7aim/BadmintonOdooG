@@ -42,6 +42,8 @@
     'assets': {
         'web.assets_backend': [
             'volan_genclikk/static/src/css/style.css',
+            'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
+            'volan_genclikk/static/src/js/qr_camera_widget.js',
         ],
     },
     'demo': [],
